@@ -1,2 +1,2 @@
 import hou
-hou.node()
+hou.node('./obj')
