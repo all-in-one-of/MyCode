@@ -1,0 +1,11 @@
+{   
+    "python.autoComplete.extraPaths": 
+    [
+        "C:/Program Files/Side Effects Software/Houdini 16.5.496/houdini/python2.7libs",
+        "C:/Program Files/Side Effects Software/Houdini 16.5.496/python27/lib/site-packages-forced",
+        "C:/Program Files/Side Effects Software/Houdini 16.5.496/python27/lib/site-packages-ui-forced",
+    ],
+    
+    "python.pythonPath": "C:\\Program Files\\Side Effects Software\\Houdini 16.5.496\\python27\\python.exe",
+    "python.linting.pylintEnabled": false,
+}
