@@ -1,0 +1,48 @@
+void pyrmid(vector pos)
+{
+    int p0 = addpoint(0, pos+{1, 0, 1});
+    int p1 = addpoint(0, pos+{1, 0, -1});
+    int p2 = addpoint(0, pos+{-1, 0, 1});
+    int p3 = addpoint(0, pos+{-1, 0, -1});
+    int p4 = addpoint(0, pos+{0, 1.5, 0});
+
+    addprim(0, 'poly', p0, p1, p3, p2);
+    addprim(0, 'poly', p0, p4, p1);
+    addprim(0, 'poly', p1, p4, p3);
+    addprim(0, 'poly', p3, p4, p2);
+    addprim(0, 'poly', p2, p4, p0);
+}
+
+
+
+void pyrmidRow(vector startPos; int count)
+{
+    for (int i = 0; i < count*2; i+=2)
+    {
+        pyrmid(startPos + set(i, 0, 0));
+    }
+
+}
+void pyrmidPlane(vector startPos; int count; int numOfRow)
+{
+    for (int i = 0; i < numOfRow*2; i+=2)
+    {
+        pyrmidRow(set(startPos)+set(0, 0, i), count);
+    }
+
+}
+
+void pyrmidUltra(vector startPos; int numOfLayer)
+{   
+    vector pos = startPos;
+    vector offset = {1, 1.5, 1};
+    for (int i = numOfLayer; i > 0; i--)
+    {   
+        pyrmidPlane(pos, i, i);
+        pos += offset;
+    }
+}
+
+vector a = 3;
+pyrmidUltra(a, 10);
+printf('%g', a);

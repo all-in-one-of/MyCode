@@ -1,0 +1,35 @@
+for (int i = 0; i < 100; ++i)
+{
+    vector randPos = rand(i);
+    // randPos.y = 0;
+    addpoint(0, randPos);
+
+}
+
+int nearpt = nearpoint(0, @P);
+addprim(0, 'polyline', nearpoint, @ptnum);
+
+
+int  nearpt = nearpoints(0, @P, 1, 2)[1];
+if (@ptnum > nearpt) 
+{
+    addprim(0, 'polyline', nearpt, @ptnum);
+
+}
+
+
+void linknearpt(vector pos; int ptnum; float maxdist; int maxpts)
+{   
+    int  nearpts[] = nearpoints(0, pos, maxdist, maxpts)[1:];
+    foreach (int nearpt; nearpts)
+    {
+        if (ptnum > nearpt) 
+        {
+            addprim(0, 'polyline', nearpt, ptnum);
+
+        }
+
+    }
+}
+
+linknearpt(@P, @ptnum, chf('maxdist'), chi('maxpts'));
