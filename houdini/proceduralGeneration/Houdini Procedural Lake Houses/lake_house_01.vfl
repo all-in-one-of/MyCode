@@ -1,0 +1,12 @@
+// grid
+@P.x = rint(@P.x/2)*2;
+@P.y = rint(@P.y/3)*3;
+@P.z = rit(@P.z/2)*2;
+
+// delete_edge_points
+int pcloud = pcopen(0, 'P', @P, 2.1, 10);
+
+if (pcnumfound(pcloud) < 5) 
+{
+    removepoint(0, @ptnum);
+}
