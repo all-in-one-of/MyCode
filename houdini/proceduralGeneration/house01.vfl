@@ -1,0 +1,21 @@
+f@up = chf('pr1_up');
+f@down = chf('pr1_down');
+f@left = chf('pr2_left');
+f@right = chf('pr2_right');
+
+
+int p0 = addpoint(0, set(f@right+1, f@up+1, -1));
+int p1 = addpoint(0, set(f@right+1, f@up+1, 1));
+int p2 = addpoint(0, set(f@left-1, f@up+1, 1));
+int p3 = addpoint(0, set(f@left-1, f@up+1, -1));
+int p4 = addpoint(0, set(f@right+1, f@down-1, -1));
+int p5 = addpoint(0, set(f@right+1, f@down-1, 1));
+int p6 = addpoint(0, set(f@left-1, f@down-1, 1));
+int p7 = addpoint(0, set(f@left-1, f@down-1, -1));
+
+addprim(0, 'poly', p0,p1,p2,p3);
+addprim(0, 'poly', p6,p5,p4,p7);
+addprim(0, 'poly', p3,p2,p6,p7);
+addprim(0, 'poly', p1,p0,p4,p5);
+addprim(0, 'poly', p2,p1,p5,p6);
+addprim(0, 'poly', p3,p7,p4,p0);
