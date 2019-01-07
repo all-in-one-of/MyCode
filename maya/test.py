@@ -1,10 +1,5 @@
 # coding=utf-8
-<<<<<<< Updated upstream
 
-a={"我":"你"}
-b=str(a)
-print a
-=======
 import sys
 from PySide2 import QtWidgets, QtCore
 from shiboken2 import wrapInstance
@@ -24,4 +19,3 @@ if __name__ == '__main__':
 
     d = TestDialog()
     d.show()
->>>>>>> Stashed changes
