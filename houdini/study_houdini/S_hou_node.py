@@ -1,3 +1,4 @@
+# coding=utf-8
 import hou
 def getChildren(node):
     childList = []
