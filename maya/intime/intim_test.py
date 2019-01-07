@@ -3,13 +3,18 @@ import json
 import pprint
 import ast
 import logging
+import os
 
-PATH = r'C:\Users\Intime\Documents\MyCode\maya\intime\a001.json'
+pwd = os.getcwd()
+
+JSONPATH = os.path.join(pwd, 'a001.json')
+TESTJSONPATH = os.path.join(pwd, 'a002.json')
 
 
 class TestIntmeCommodity(object):
 
-    def __init__(self, info):
+    def __init__(self, info, jsonPath):
+        self.jsonPath = jsonPath
         self.info = info
         self.sku = info['sku']
         self.cmName = info['名称']
@@ -18,7 +23,8 @@ class TestIntmeCommodity(object):
         self.hder = info['对接人']
         self.refPhPath = info['参考图地址']
         self.mayaFlPath = info['maya文件地址']
-
+        self.fbxFlPath = info['fbx文件地址']
+        self.texFlPath = info['贴图地址']
 
     def skuNumber(self):
         # sku号码
@@ -34,7 +40,7 @@ class TestIntmeCommodity(object):
         else:
             logging.warning('商品名称为空，请联系XX')
 
-    def commodityModel(self, info):
+    def commodityModel(self):
         # 制作类型
         if self.cmModel:
             print '制作类型:', self.cmModel
@@ -50,7 +56,7 @@ class TestIntmeCommodity(object):
         else:
             self.info['制作人'] = name
             print '制作人:', self.info['制作人']
-            with open(r'C:\Users\Intime\Documents\MyCode\maya\intime\a002.json', 'w') as f:
+            with open(self.jsonPath, 'w') as f:
                 json.dump(self.info, f, indent=2, ensure_ascii=False)
 
     def header(self):
@@ -67,31 +73,60 @@ class TestIntmeCommodity(object):
         else:
             print '参考图地址: 请联系对接人，等待补全'
 
-    def mayaFilePath(self,path=None):
+    def mayaFilePath(self, path=None):
         # maya文件地址
         if self.mayaFlPath:
             print self.mayaFlPath
         elif path is None:
             print 'maya文件地址: 等待制作'
         else:
-            self.info['maya文件地址'] = path
-            print 'maya文件地址:', path
-            with open(r'C:\Users\Intime\Documents\MyCode\maya\intime\a002.json', 'w') as f:
+            self.info['fbx文件地址'] = path
+            print 'fbx文件地址:', path
+            with open(self.jsonPath, 'w') as f:
+                json.dump(self.info, f, indent=2, ensure_ascii=False)
+
+    def fbxFilePath(self, path=None):
+        if self.fbxFlPath and path is None:
+            print self.fbxFlPath
+        elif path is None:
+            print 'fbx文件地址: 等待制作'
+        else:
+            self.info['fbx文件地址'] = path
+            print 'fbx文件地址:', path
+            with open(self.jsonPath, 'w') as f:
+                json.dump(self.info, f, indent=2, ensure_ascii=False)
+
+    def texFilePath(self, path=None):
+        if self.fbxFlPath and path is None:
+            print self.fbxFlPath
+        elif path is None:
+            print '参考图地址: 等待制作'
+        else:
+            self.info['参考图地址'] = path
+            print '参考图地址:', path
+            with open(self.jsonPath, 'w') as f:
                 json.dump(self.info, f, indent=2, ensure_ascii=False)
 
 
-if __name__ == '__main__':
-    with open(PATH, 'r') as f:
-        info = json.load(f)
-        b = json.dumps(info, encoding="utf-8", ensure_ascii=False)
-        c = b.encode('utf-8')
-        d = eval(c)
+# 读取json文件，转换成字典
+def readJson(path):
+    with open(path, 'r') as f:
+        info = json.load(f)  # 导入json文件
+        b = json.dumps(info, encoding="utf-8", ensure_ascii=False)  # 转码成字符串
+        c = eval(b)  # 转回字典
+    return c  # 返回字典
 
-    a = TestIntmeCommodity(d)
+
+if __name__ == '__main__':
+    commodityInfo = readJson(JSONPATH)
+
+    a = TestIntmeCommodity(commodityInfo, TESTJSONPATH)
     a.commodityName()
     a.skuNumber()
-    a.commodityModel(d)
-    a.modelMaker('王大锤')
+    a.commodityModel()
     a.header()
     a.referencePhotoPath()
     a.mayaFilePath()
+    a.fbxFilePath()
+    a.modelMaker('王大锤')
+    a.texFilePath()
