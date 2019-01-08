@@ -17,7 +17,7 @@ class TestIntmeCommodity(object):
         self.jsonPath = jsonPath
         self.info = info
         self.sku = info['sku']
-        self.cmName = info['名称']
+        self.cmName = info['商品名称']
         self.cmModel = info['制作类型']
         self.mdMaker = info['制作人']
         self.hder = info['对接人']
@@ -25,7 +25,9 @@ class TestIntmeCommodity(object):
         self.mayaFlPath = info['maya文件地址']
         self.fbxFlPath = info['fbx文件地址']
         self.texFlPath = info['贴图地址']
-        self.metaInfo = info['金属材质']
+        self.cmSize = info['商品长宽高']
+        self.metaInfo = info['是否有金属配件']
+        self.objFlPath = info['obj文件地址']
 
     def skuNumber(self):
         # sku号码
@@ -115,6 +117,17 @@ class TestIntmeCommodity(object):
         else:
             print '没有金属配件'
 
+    def commoditySize(self):
+        if self.cmSize:
+            print self.cmSize
+
+        else:
+            print '缺少产品信息请联系对接人'
+    def objFilePath(self):
+        if self.objFlPath():
+            print self.objFlPath
+        else:
+            print "等待制作"
 
 # 读取json文件，转换成字典
 def readJson(path):
@@ -138,4 +151,5 @@ if __name__ == '__main__':
     a.fbxFilePath()
     a.modelMaker('王大锤')
     a.texFilePath()
+    a.commoditySize()
     a.metalnessInfo()

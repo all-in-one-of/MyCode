@@ -5,17 +5,4 @@ from PySide2 import QtWidgets, QtCore
 from shiboken2 import wrapInstance
 import maya.OpenMayaUI as om
 
-def maya_main_window():
-    main_window_ptr = om.MQtUtil.mainWindow()
-    return wrapInstance(long(main_window_ptr),QtWidgets.QWidget)
-
-class TestDialog(QtWidgets.QDialog):
-
-    def __init__(self, parent=maya_main_window()):
-        super(TestDialog, self).__init__(parent)
-        self.setWindowTitle('啦啦啦')
-
-if __name__ == '__main__':
-
-    d = TestDialog()
-    d.show()
+print '\xe6\x98\xaf\xe5\x90\xa6\xe6\x9c\x89\xe9\x87\x91\xe5\xb1\x9e\xe9\x85\x8d\xe4\xbb\xb6'
