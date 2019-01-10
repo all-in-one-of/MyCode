@@ -7,7 +7,7 @@ import os
 
 pwd = os.getcwd()
 
-JSONPATH = os.path.join(pwd, 'a001.json')
+JSONPATH = os.path.join(pwd, '0010000000.json')
 TESTJSONPATH = os.path.join(pwd, 'a002.json')
 
 
@@ -28,6 +28,7 @@ class TestIntmeCommodity(object):
         self.cmSize = info['商品长宽高']
         self.metaInfo = info['是否有金属配件']
         self.objFlPath = info['obj文件地址']
+        self.maxFlPath = info['3dMax地址']
 
     def skuNumber(self):
         # sku号码
@@ -123,11 +124,21 @@ class TestIntmeCommodity(object):
 
         else:
             print '缺少产品信息请联系对接人'
+
     def objFilePath(self):
         if self.objFlPath():
             print self.objFlPath
         else:
             print "等待制作"
+
+    def maxFilePath(self):
+        if self.maxFlPath:
+            # os.startfile(self.maxFlPath.decode('utf-8'))
+            print '等待打开'
+
+        else:
+            print'无模型'
+
 
 # 读取json文件，转换成字典
 def readJson(path):
@@ -136,6 +147,7 @@ def readJson(path):
         b = json.dumps(info, encoding="utf-8", ensure_ascii=False)  # 转码成字符串
         c = eval(b)  # 转回字典
     return c  # 返回字典
+
 
 
 if __name__ == '__main__':
@@ -153,3 +165,4 @@ if __name__ == '__main__':
     a.texFilePath()
     a.commoditySize()
     a.metalnessInfo()
+    a.maxFilePath()
