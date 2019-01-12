@@ -30,10 +30,12 @@ def copyfile(files, path=None, nummber=1):
     :param nummber: 复制次数
     :return:
     """
-    if path:
+    if type(files) is list and path:
         for file in files:
             shutil.copy(file, path)
-    if path is None:
+    elif type(files) is str and path:
+        shutil.copy(files, path)
+    elif path is None:
         for i in range(nummber):
             for file in files:
                 suffix = file.split('.')[1]
@@ -64,5 +66,8 @@ def readJson(path):
         c = eval(b)  # 转回字典
     return c  # 返回字典
 
-
 # print time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+# path = r"C:\Users\HYC\.anaconda\navigator\images\072618-webinar-AE-FUheroimage-01-3.jpg"
+# tpath = r'D:\locaMaya'
+#
