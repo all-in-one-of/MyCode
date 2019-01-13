@@ -71,3 +71,4 @@ def readJson(path):
 # path = r"C:\Users\HYC\.anaconda\navigator\images\072618-webinar-AE-FUheroimage-01-3.jpg"
 # tpath = r'D:\locaMaya'
 #
+

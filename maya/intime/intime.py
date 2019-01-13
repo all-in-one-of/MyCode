@@ -15,6 +15,12 @@ JSONFILESPATH = r"D:\jsons"
 PROJECTPATH = r'D:\testProject'
 MAYAPROJECT = cmds.workspace(fn=True)
 
+class MayaController(object):
+    def createPBS(self,name):
+        shader = cmds.shadingNode('StingrayPBS', asShader=True, name=name)
+        shading_group = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=name + 'SG')
+        cmds.connectAttr(shader + '.outColor', shading_group + '.surfaceShader')
+
 
 class IntmeCommodity(dict):
 
