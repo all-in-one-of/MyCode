@@ -15,14 +15,59 @@ JSONFILESPATH = r"D:\jsons"
 PROJECTPATH = r'D:\testProject'
 MAYAPROJECT = cmds.workspace(fn=True)
 
-class MayaController(object):
-    def createPBS(self,name):
-        shader = cmds.shadingNode('StingrayPBS', asShader=True, name=name)
-        shading_group = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=name + 'SG')
-        cmds.connectAttr(shader + '.outColor', shading_group + '.surfaceShader')
-
 
 class IntmeCommodity(dict):
+    def createPBS(self, name, direcotory, ismetallic=None, isemissive=None, isroughness=None):
+        imges = os.listdir(direcotory)
+        for img in imges:
+            if img.endswith('%s_b.png' % name):
+                baseTex = os.path.join(direcotory, img)
+            if img.endswith('%s_n.png' % name):
+                noramlTex = os.path.join(direcotory, img)
+            if img.endswith('%s_ao.png' % name):
+                aoTex = os.path.join(direcotory, img)
+            if img.endswith('%s_r.png' % name):
+                roughnessTex = os.path.join(direcotory, img)
+            if img.endswith('%s_m.png' % name):
+                metallicTex = os.path.join(direcotory, img)
+            if img.endswith('%s_e.png' % name):
+                emissiveTex = os.path.join(direcotory, img)
+
+        shaderName = 'M_' + name + '_w'
+        shader = cmds.shadingNode('StingrayPBS', asShader=True, name=shaderName)
+        cmds.shaderfx(sfxnode=shader, initShaderAttributes=True)
+
+        shading_group = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=shaderName + 'SG')
+        cmds.connectAttr(shader + '.outColor', shading_group + '.surfaceShader')
+
+        baseColor = cmds.shadingNode('file', at=True, name='T_' + name + '_b')
+        cmds.setAttr(shader + '.use_color_map', 1)
+        cmds.connectAttr(baseColor + '.outColor', shader + '.TEX_color_map')
+
+        normal = cmds.shadingNode('file', at=True, name='T_' + name + '_n')
+        cmds.setAttr(shader + '.use_normal_map', 1)
+        cmds.connectAttr(normal + '.outColor', shader + '.TEX_normal_map')
+
+        ambientOcclusion = cmds.shadingNode('file', at=True, name='T_' + name + '_ao')
+        cmds.setAttr(shader + '.use_ao_map', 1)
+        cmds.connectAttr(ambientOcclusion + '.outColor', shader + '.TEX_ao_map')
+
+        if isroughness:
+            roughness = cmds.shadingNode('file', at=True, name='T_' + name + '_r')
+            cmds.setAttr(shader + '.use_roughness_map', 1)
+            cmds.connectAttr(roughness + '.outColor', shader + '.TEX_roughness_map')
+
+        if ismetallic:
+            metallic = cmds.shadingNode('file', at=True, name='T_' + name + '_m')
+            cmds.setAttr(shader + '.use_metallic_map', 1)
+            cmds.connectAttr(metallic + '.outColor', shader + '.TEX_metallic_map')
+
+        if isemissive:
+            emissive = cmds.shadingNode('file', at=True, name='T_' + name + '_e')
+            cmds.setAttr(shader + '.use_emissive_map', 1)
+            cmds.connectAttr(emissive + '.outColor', shader + '.TEX_emissive_map')
+
+        # cmds.setAttr(ao + '.fileTextureName', i[0], type='string')
 
     def findCommodity(self, directory=JSONFILESPATH):
         """
@@ -102,5 +147,5 @@ def run():
     for n, info in a.items():
         name.append(n)
 
-    a.updateMayaFile(name=name[0], note='第一版')
+    a.createPBS(name[0])
     # a.loadMayaFile(name=name[0], versions='2019-01-12')
