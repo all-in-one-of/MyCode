@@ -3,7 +3,7 @@ import datetime
 import json
 import pprint
 import shutil
-
+from PIL import Image
 import ast
 from maya import cmds
 import logging
@@ -17,21 +17,22 @@ MAYAPROJECT = cmds.workspace(fn=True)
 
 
 class IntmeCommodity(dict):
-    def createPBS(self, name, direcotory, ismetallic=None, isemissive=None, isroughness=None):
-        imges = os.listdir(direcotory)
-        for img in imges:
-            if img.endswith('%s_b.png' % name):
-                baseTex = os.path.join(direcotory, img)
-            if img.endswith('%s_n.png' % name):
-                noramlTex = os.path.join(direcotory, img)
-            if img.endswith('%s_ao.png' % name):
-                aoTex = os.path.join(direcotory, img)
-            if img.endswith('%s_r.png' % name):
-                roughnessTex = os.path.join(direcotory, img)
-            if img.endswith('%s_m.png' % name):
-                metallicTex = os.path.join(direcotory, img)
-            if img.endswith('%s_e.png' % name):
-                emissiveTex = os.path.join(direcotory, img)
+    def createPBS(self, name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
+
+        for i in os.listdir(MAYAPROJECT):
+            if i.endswith('AmbientOcclusion.png'):
+                # shutil.copyfile(os.path.join(MAYAPROJECT, i), os.path.join(direcotory, 'T_%s_ao.png' % name))
+                # im = Image.open(os.path.join(MAYAPROJECT, i))
+                # im.thumbnail(512,512)
+                # im.save()
+                os.remove(os.path.join(MAYAPROJECT, i))
+            if i.endswith('Diffuse.png'):
+                shutil.copyfile(os.path.join(MAYAPROJECT, i), os.path.join(direcotory, 'T_%s_b.png' % name))
+                os.remove(os.path.join(MAYAPROJECT, i))
+
+            if i.endswith('Normals.png'):
+                shutil.copyfile(os.path.join(MAYAPROJECT, i), os.path.join(direcotory, 'T_%s_n.png' % name))
+                os.remove(os.path.join(MAYAPROJECT, i))
 
         shaderName = 'M_' + name + '_w'
         shader = cmds.shadingNode('StingrayPBS', asShader=True, name=shaderName)
@@ -40,32 +41,49 @@ class IntmeCommodity(dict):
         shading_group = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=shaderName + 'SG')
         cmds.connectAttr(shader + '.outColor', shading_group + '.surfaceShader')
 
-        baseColor = cmds.shadingNode('file', at=True, name='T_' + name + '_b')
-        cmds.setAttr(shader + '.use_color_map', 1)
-        cmds.connectAttr(baseColor + '.outColor', shader + '.TEX_color_map')
+        imges = os.listdir(direcotory)
+        for img in imges:
+            if img.endswith('%s_b.png' % name):
+                baseTex = os.path.join(direcotory, img)
+                baseColor = cmds.shadingNode('file', at=True, name='T_' + name + '_b')
+                cmds.setAttr(shader + '.use_color_map', 1)
+                cmds.connectAttr(baseColor + '.outColor', shader + '.TEX_color_map')
+                cmds.setAttr(baseColor + '.fileTextureName', baseTex, type='string')
 
-        normal = cmds.shadingNode('file', at=True, name='T_' + name + '_n')
-        cmds.setAttr(shader + '.use_normal_map', 1)
-        cmds.connectAttr(normal + '.outColor', shader + '.TEX_normal_map')
+            if img.endswith('%s_n.png' % name):
+                noramlTex = os.path.join(direcotory, img)
+                normal = cmds.shadingNode('file', at=True, name='T_' + name + '_n')
+                cmds.setAttr(shader + '.use_normal_map', 1)
+                cmds.connectAttr(normal + '.outColor', shader + '.TEX_normal_map')
+                cmds.setAttr(normal + '.fileTextureName', noramlTex, type='string')
 
-        ambientOcclusion = cmds.shadingNode('file', at=True, name='T_' + name + '_ao')
-        cmds.setAttr(shader + '.use_ao_map', 1)
-        cmds.connectAttr(ambientOcclusion + '.outColor', shader + '.TEX_ao_map')
+            if img.endswith('%s_ao.png' % name):
+                aoTex = os.path.join(direcotory, img)
+                ambientOcclusion = cmds.shadingNode('file', at=True, name='T_' + name + '_ao')
+                cmds.setAttr(shader + '.use_ao_map', 1)
+                cmds.connectAttr(ambientOcclusion + '.outColor', shader + '.TEX_ao_map')
+                cmds.setAttr(ambientOcclusion + '.fileTextureName', aoTex, type='string')
 
-        if isroughness:
-            roughness = cmds.shadingNode('file', at=True, name='T_' + name + '_r')
-            cmds.setAttr(shader + '.use_roughness_map', 1)
-            cmds.connectAttr(roughness + '.outColor', shader + '.TEX_roughness_map')
+            if img.endswith('%s_r.png' % name):
+                roughnessTex = os.path.join(direcotory, img)
+                roughness = cmds.shadingNode('file', at=True, name='T_' + name + '_r')
+                cmds.setAttr(shader + '.use_roughness_map', 1)
+                cmds.connectAttr(roughness + '.outColor', shader + '.TEX_roughness_map')
+                cmds.setAttr(roughness + '.fileTextureName', roughnessTex, type='string')
 
-        if ismetallic:
-            metallic = cmds.shadingNode('file', at=True, name='T_' + name + '_m')
-            cmds.setAttr(shader + '.use_metallic_map', 1)
-            cmds.connectAttr(metallic + '.outColor', shader + '.TEX_metallic_map')
+            if img.endswith('%s_m.png' % name):
+                metallicTex = os.path.join(direcotory, img)
+                metallic = cmds.shadingNode('file', at=True, name='T_' + name + '_m')
+                cmds.setAttr(shader + '.use_metallic_map', 1)
+                cmds.connectAttr(metallic + '.outColor', shader + '.TEX_metallic_map')
+                cmds.setAttr(metallic + '.fileTextureName', metallicTex, type='string')
 
-        if isemissive:
-            emissive = cmds.shadingNode('file', at=True, name='T_' + name + '_e')
-            cmds.setAttr(shader + '.use_emissive_map', 1)
-            cmds.connectAttr(emissive + '.outColor', shader + '.TEX_emissive_map')
+            if img.endswith('%s_e.png' % name):
+                emissiveTex = os.path.join(direcotory, img)
+                emissive = cmds.shadingNode('file', at=True, name='T_' + name + '_e')
+                cmds.setAttr(shader + '.use_emissive_map', 1)
+                cmds.connectAttr(emissive + '.outColor', shader + '.TEX_emissive_map')
+                cmds.setAttr(emissive + '.fileTextureName', emissiveTex, type='string')
 
         # cmds.setAttr(ao + '.fileTextureName', i[0], type='string')
 
@@ -147,5 +165,11 @@ def run():
     for n, info in a.items():
         name.append(n)
 
-    a.createPBS(name[0])
+    # a.createPBS(name[0])
+    for i in os.listdir(MAYAPROJECT):
+        if i.endswith('Diffuse.png'):
+            im = Image.open(os.path.join(MAYAPROJECT, i))
+            im = im.size(128, 128)
+            im.show()
+            # im.save(os.path.join(MAYAPROJECT, i),'png')
     # a.loadMayaFile(name=name[0], versions='2019-01-12')

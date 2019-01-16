@@ -158,13 +158,3 @@ c = {
     "c005": "明式茶边架",
 }
 
-path = r'F:\Share\HSM\aaa'
-ppath = u'F:\Share\HHH\ARKit15 - 副本\Photon'
-
-image = os.listdir(ppath)
-for k, v in b.items():
-    for i in image:
-        name,suff = os.path.splitext(i)
-        img = os.path.join(ppath,i)
-        if name==k:
-            shutil.copy(img,os.path.join(path,v.decode('utf-8')))
