@@ -3,12 +3,14 @@ import datetime
 import json
 import pprint
 import shutil
-from PIL import Image
+from PIL import Image, ImageChops
 import ast
 from maya import cmds
 import logging
 import os
 from PySide2 import QtWidgets, QtCore, QtGui
+import pymel.core as pm
+
 from CommonTools import tools
 
 JSONFILESPATH = r"D:\jsons"
@@ -18,25 +20,37 @@ MAYAPROJECT = cmds.workspace(fn=True)
 
 class IntmeCommodity(dict):
     def createPBS(self, name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
-
+        if cmds.ls(sl=True, type='dagNode'):
+            meshName = cmds.ls(sl=True, type='dagNode')[0]
+        else:
+            cmds.warning(u'未选择模型')
+            return
         for i in os.listdir(MAYAPROJECT):
             if i.endswith('AmbientOcclusion.png'):
                 # shutil.copyfile(os.path.join(MAYAPROJECT, i), os.path.join(direcotory, 'T_%s_ao.png' % name))
-                # im = Image.open(os.path.join(MAYAPROJECT, i))
-                # im.thumbnail(512,512)
-                # im.save()
+                im = Image.open(os.path.join(MAYAPROJECT, i))
+                im = im.resize((512, 512), Image.ANTIALIAS)
+                im.save(os.path.join(direcotory, 'T_%s_ao.png' % name))
                 os.remove(os.path.join(MAYAPROJECT, i))
             if i.endswith('Diffuse.png'):
-                shutil.copyfile(os.path.join(MAYAPROJECT, i), os.path.join(direcotory, 'T_%s_b.png' % name))
+                # shutil.copyfile(os.path.join(MAYAPROJECT, i), os.path.join(direcotory, 'T_%s_b.png' % name))
+                im = Image.open(os.path.join(MAYAPROJECT, i))
+                im = im.resize((2048, 2048), Image.ANTIALIAS)
+                im.save(os.path.join(direcotory, 'T_%s_b.png' % name))
+
                 os.remove(os.path.join(MAYAPROJECT, i))
 
             if i.endswith('Normals.png'):
-                shutil.copyfile(os.path.join(MAYAPROJECT, i), os.path.join(direcotory, 'T_%s_n.png' % name))
+                # shutil.copyfile(os.path.join(MAYAPROJECT, i), os.path.join(direcotory, 'T_%s_n.png' % name))
+                im = Image.open(os.path.join(MAYAPROJECT, i))
+                im = im.resize((2048, 2048), Image.ANTIALIAS)
+                im.save(os.path.join(direcotory, 'T_%s_n.png' % name))
+
                 os.remove(os.path.join(MAYAPROJECT, i))
 
         shaderName = 'M_' + name + '_w'
         shader = cmds.shadingNode('StingrayPBS', asShader=True, name=shaderName)
-        cmds.shaderfx(sfxnode=shader, initShaderAttributes=True)
+        cmds.shaderfx(sfxnode=shader, initShaderAttributes=True)  # 初始化pbs
 
         shading_group = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=shaderName + 'SG')
         cmds.connectAttr(shader + '.outColor', shading_group + '.surfaceShader')
@@ -86,6 +100,31 @@ class IntmeCommodity(dict):
                 cmds.setAttr(emissive + '.fileTextureName', emissiveTex, type='string')
 
         # cmds.setAttr(ao + '.fileTextureName', i[0], type='string')
+        cmds.sets(meshName, e=True, fe=shading_group)
+
+    def createShadow(self, name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
+        if cmds.ls(sl=True, type='dagNode'):
+            meshName = cmds.ls(sl=True, type='dagNode')[0]
+        else:
+            cmds.warning(u'未选择模型')
+            return
+
+        if 'T_%s_s.png' % name in os.listdir(direcotory):
+            shaderName = 'M_' + name + '_s'
+            shader = cmds.shadingNode('lambert', asShader=True, name=shaderName)
+            shading_group = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=shaderName + 'SG')
+            cmds.connectAttr(shader + '.outColor', shading_group + '.surfaceShader')
+            shadowTex = os.path.join(direcotory, os.path.join(direcotory, 'T_%s_s.png' % name))
+            shadow = cmds.shadingNode('file', at=True, name='T_' + name + '_s')
+            cmds.connectAttr(shadow + '.outColor', shader + '.color')
+            cmds.connectAttr(shadow + '.outTransparency', shader + '.transparency')
+
+            cmds.setAttr(shadow + '.fileTextureName', shadowTex, type='string')
+            cmds.sets(meshName, e=True, fe=shading_group)
+
+        else:
+            cmds.warning(u'没有影子贴图')
+            return
 
     def findCommodity(self, directory=JSONFILESPATH):
         """
@@ -165,11 +204,13 @@ def run():
     for n, info in a.items():
         name.append(n)
 
-    # a.createPBS(name[0])
-    for i in os.listdir(MAYAPROJECT):
-        if i.endswith('Diffuse.png'):
-            im = Image.open(os.path.join(MAYAPROJECT, i))
-            im = im.size(128, 128)
-            im.show()
-            # im.save(os.path.join(MAYAPROJECT, i),'png')
+    a.createShadow(name[0])
+
     # a.loadMayaFile(name=name[0], versions='2019-01-12')
+def imges(imge=r"D:\HKW\mayacontroller\turtle\bakedTextures\baked_beauty_pPlaneShape1.png"):
+    img = Image.open(imge)
+    img = img.convert('L')
+    img = ImageChops.invert(img)
+    img1 = Image.new('RGBA',(512,512),(0,0,0,0))
+    img1.putalpha(img)
+    img1.save(r"D:\HKW\mayacontroller\turtle\bakedTextures\aa1.png")

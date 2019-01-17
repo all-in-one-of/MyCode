@@ -158,3 +158,15 @@ c = {
     "c005": "明式茶边架",
 }
 
+from PIL import Image,ImageChops
+
+# im1=Image.open(r"D:\HKW\mayacontroller\turtle\bakedTextures\baked_beauty_pPlaneShape1.png")
+# im1.show()
+
+def imges(imge):
+    img = Image.open(imge)
+    img = img.convert('l')
+    img = ImageChops.invert(img)
+    img1 = Image.new('RGBA',(512,512),(0,0,0,0))
+    img1.putalpha(img)
+    img1.save()
