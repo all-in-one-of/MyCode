@@ -3,13 +3,14 @@ import datetime
 import json
 import pprint
 import shutil
-from PIL import Image, ImageChops
+from PIL import Image, ImageChops, ImageOps,ImageFilter
 import ast
 from maya import cmds
 import logging
 import os
 from PySide2 import QtWidgets, QtCore, QtGui
 import pymel.core as pm
+import cv2
 
 from CommonTools import tools
 
@@ -19,6 +20,31 @@ MAYAPROJECT = cmds.workspace(fn=True)
 
 
 class IntmeCommodity(dict):
+    def initializeTurtle(self):
+        # Load Turtle
+
+        pluginStatus = cmds.pluginInfo("Turtle", q=True, l=True, n=True)
+        if pluginStatus == False:
+            cmds.loadPlugin("Turtle")
+
+        # Create bake nodes
+        cmds.setAttr("defaultRenderGlobals.currentRenderer", "turtle", type="string")
+        tOptions = cmds.createNode("ilrOptionsNode", name="TurtleRenderOptions")
+        tBakeLayer = cmds.createNode("ilrBakeLayer", name="TurtleDefaultBakeLayer")
+        tbakeLayerMgr = cmds.createNode("ilrBakeLayerManager", name="TurtleBakeLayerManager")
+
+        # cmds.setAttr(tOptions + '.renderer', 1)
+        # cmds.setAttr(tOptions + '.aaMaxSampleRate', 4)
+        # cmds.setAttr(tOptions + '.aaMinSampleRate', 2)
+        # cmds.setAttr(tBakeLayer + '.tbImageFormat', 9)
+
+        cmds.connectAttr(tOptions + ".message", tBakeLayer + ".renderOptions")
+        cmds.connectAttr(tBakeLayer + ".index", tbakeLayerMgr + ".bakeLayerId[0]")
+
+        # cmds.connectAttr(mesh + ".instObjGroups[0]", tBakeLayer + ".dagSetMembers[0]")
+        pm.mel.eval(
+            'ilrTextureBakeCmd -target "pPlaneShape1" -frontRange 0 -backRange 200 -frontBias 0 -backBias -100 -transferSpace 1 -selectionMode 0 -mismatchMode 0 -envelopeMode 0 -ignoreInconsistentNormals 1 -considerTransparency 0 -transparencyThreshold 0.001000000047 -camera "persp" -normalDirection 0 -shadows 1 -alpha 1 -viewDependent 0 -orthoRefl 1 -backgroundColor 0 0 0 -frame 1 -bakeLayer TurtleDefaultBakeLayer -width 512 -height 512 -saveToRenderView 0 -saveToFile 1 -directory "D:/HKW/mayacontroller/turtle/bakedTextures/" -fileName "baked_$p_$s.$e" -fileFormat 9 -visualize 0 -uvRange 0 -uMin 0 -uMax 1 -vMin 0 -vMax 1 -uvSet "" -tangentUvSet "" -edgeDilation 5 -bilinearFilter 1 -merge 0 -conservative 0 -windingOrder 1 -fullShading 1 -useRenderView 1 -layer defaultRenderLayer')
+
     def createPBS(self, name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
         if cmds.ls(sl=True, type='dagNode'):
             meshName = cmds.ls(sl=True, type='dagNode')[0]
@@ -114,7 +140,7 @@ class IntmeCommodity(dict):
             shader = cmds.shadingNode('lambert', asShader=True, name=shaderName)
             shading_group = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=shaderName + 'SG')
             cmds.connectAttr(shader + '.outColor', shading_group + '.surfaceShader')
-            shadowTex = os.path.join(direcotory, os.path.join(direcotory, 'T_%s_s.png' % name))
+            shadowTex = os.path.join(direcotory, 'T_%s_s.png' % name)
             shadow = cmds.shadingNode('file', at=True, name='T_' + name + '_s')
             cmds.connectAttr(shadow + '.outColor', shader + '.color')
             cmds.connectAttr(shadow + '.outTransparency', shader + '.transparency')
@@ -123,8 +149,35 @@ class IntmeCommodity(dict):
             cmds.sets(meshName, e=True, fe=shading_group)
 
         else:
-            cmds.warning(u'没有影子贴图')
-            return
+            bbox = cmds.exactWorldBoundingBox(meshName)
+            extend = 15
+            shdowsX = (bbox[3] - bbox[0]) + extend
+            shdowsZ = (bbox[5] - bbox[2]) + extend
+            sPlane = cmds.polyPlane(w=shdowsX, h=shdowsZ, sx=1, sy=1)
+            sShader = cmds.shadingNode('ilrOccSampler', asShader=True)
+            cmds.select(sPlane[0])
+            cmds.hyperShade(a=sShader, assign=True)
+            cmds.setAttr('%s.maxSamples' % sShader, 512)
+            cmds.setAttr('%s.minSamples' % sShader, 128)
+
+            cmds.setAttr('%s.output' % sShader, 3)
+            cmds.setAttr('%s.enableAdaptiveSampling' % sShader, 0)
+
+            self.initializeTurtle()
+            cmds.select(sPlane[0])
+            aoMapAdjust(os.path.join(direcotory, 'T_%s_s.png' % name),
+                        os.path.join(MAYAPROJECT, r"turtle\bakedTextures\baked_beauty_pPlaneShape1.png"))
+            # img = Image.open(os.path.join(MAYAPROJECT, r"turtle\bakedTextures\baked_beauty_pPlaneShape1.png"))
+            # img = img.convert('L')
+            #
+            # img = ImageOps.autocontrast(img)
+            #
+            # img = ImageChops.invert(img)
+            # img1 = Image.new('RGBA', (512, 512), (0, 0, 0, 0))
+            # img1.putalpha(img)
+            # print 'aaaaa'
+            # img1.save(os.path.join(direcotory, 'T_%s_s.png' % name))
+            self.createShadow(name)
 
     def findCommodity(self, directory=JSONFILESPATH):
         """
@@ -207,10 +260,23 @@ def run():
     a.createShadow(name[0])
 
     # a.loadMayaFile(name=name[0], versions='2019-01-12')
-def imges(imge=r"D:\HKW\mayacontroller\turtle\bakedTextures\baked_beauty_pPlaneShape1.png"):
+
+
+def aoMapAdjust(taImage, imge=r"D:\HKW\mayacontroller\turtle\bakedTextures\baked_beauty_pPlaneShape1.png"):
     img = Image.open(imge)
     img = img.convert('L')
+    pixel = []
+    for i in range(256):
+        pixel.append(img.getpixel((i, 2)))
+
+    cvimg = cv2.imread(imge)
+    ret, thresh3 = cv2.threshold(cvimg, min(pixel), 255, cv2.THRESH_TRUNC)
+    cv2.imwrite(imge, thresh3)
+    img = Image.open(imge)
+    img = img.convert('L')
+    img = ImageOps.autocontrast(img)
     img = ImageChops.invert(img)
-    img1 = Image.new('RGBA',(512,512),(0,0,0,0))
+    img = img.filter(ImageFilter.GaussianBlur(2.5))
+    img1 = Image.new('RGBA', (512, 512), (0, 0, 0, 0))
     img1.putalpha(img)
-    img1.save(r"D:\HKW\mayacontroller\turtle\bakedTextures\aa1.png")
+    img1.save(taImage)

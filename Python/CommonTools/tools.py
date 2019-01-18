@@ -4,7 +4,8 @@ import os
 import shutil
 import datetime
 import time
-
+import numpy
+import cv2
 
 def findSpecifiedFile(path, suffix=''):
     '''
@@ -72,3 +73,30 @@ def readJson(path):
 # tpath = r'D:\locaMaya'
 #
 
+import cv2
+
+img=cv2.imread(r"D:\HKW\mayacontroller\turtle\bakedTextures\baked_beauty_pPlaneShape1.png")
+filename = r"D:\HKW\mayacontroller\turtle\bakedTextures\abc.png"
+GrayImage=cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+
+ret,thresh3=cv2.threshold(GrayImage,156,255,cv2.THRESH_TRUNC)
+equ = cv2.equalizeHist(thresh3)
+cv2.imshow('aaa',thresh3)
+cv2.imshow('bbb',equ)
+cv2.imwrite(filename, thresh3)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+from PIL import Image,ImageChops,ImageEnhance,ImageOps
+
+img = Image.open(r"D:\HKW\mayacontroller\turtle\bakedTextures\abc.png")
+img = img.convert('L')
+img=ImageOps.autocontrast(img)
+img.show()
+a = []
+for i in range(256):
+    pixel = img.getpixel((i,2))
+    a.append(pixel)
+
+a.sort()
+print a[0]
