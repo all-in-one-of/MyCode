@@ -3,7 +3,7 @@ import datetime
 import json
 import pprint
 import shutil
-from PIL import Image, ImageChops, ImageOps,ImageFilter
+from PIL import Image, ImageChops, ImageOps, ImageFilter
 import ast
 from maya import cmds
 import logging
@@ -21,6 +21,10 @@ MAYAPROJECT = cmds.workspace(fn=True)
 
 class IntmeCommodity(dict):
     def initializeTurtle(self):
+        '''
+        海龟烘培ao
+        :return:
+        '''
         # Load Turtle
 
         pluginStatus = cmds.pluginInfo("Turtle", q=True, l=True, n=True)
@@ -46,12 +50,19 @@ class IntmeCommodity(dict):
             'ilrTextureBakeCmd -target "pPlaneShape1" -frontRange 0 -backRange 200 -frontBias 0 -backBias -100 -transferSpace 1 -selectionMode 0 -mismatchMode 0 -envelopeMode 0 -ignoreInconsistentNormals 1 -considerTransparency 0 -transparencyThreshold 0.001000000047 -camera "persp" -normalDirection 0 -shadows 1 -alpha 1 -viewDependent 0 -orthoRefl 1 -backgroundColor 0 0 0 -frame 1 -bakeLayer TurtleDefaultBakeLayer -width 512 -height 512 -saveToRenderView 0 -saveToFile 1 -directory "D:/HKW/mayacontroller/turtle/bakedTextures/" -fileName "baked_$p_$s.$e" -fileFormat 9 -visualize 0 -uvRange 0 -uMin 0 -uMax 1 -vMin 0 -vMax 1 -uvSet "" -tangentUvSet "" -edgeDilation 5 -bilinearFilter 1 -merge 0 -conservative 0 -windingOrder 1 -fullShading 1 -useRenderView 1 -layer defaultRenderLayer')
 
     def createPBS(self, name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
+        '''
+        创建pbs
+        :param name: 名字
+        :param direcotory: 贴图文件夹，默认项目文件夹sourceimages
+        :return:
+        '''
         if cmds.ls(sl=True, type='dagNode'):
             meshName = cmds.ls(sl=True, type='dagNode')[0]
         else:
             cmds.warning(u'未选择模型')
             return
         for i in os.listdir(MAYAPROJECT):
+            # 使用simplygon减面
             if i.endswith('AmbientOcclusion.png'):
                 # shutil.copyfile(os.path.join(MAYAPROJECT, i), os.path.join(direcotory, 'T_%s_ao.png' % name))
                 im = Image.open(os.path.join(MAYAPROJECT, i))
@@ -129,12 +140,18 @@ class IntmeCommodity(dict):
         cmds.sets(meshName, e=True, fe=shading_group)
 
     def createShadow(self, name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
+        '''
+        创建阴影材质球
+        :param name: 名字
+        :param direcotory: 文件夹，默认项目文件夹sourceimages
+        '''
         if cmds.ls(sl=True, type='dagNode'):
             meshName = cmds.ls(sl=True, type='dagNode')[0]
         else:
             cmds.warning(u'未选择模型')
             return
 
+        # 如果有阴影贴图，直接贴
         if 'T_%s_s.png' % name in os.listdir(direcotory):
             shaderName = 'M_' + name + '_s'
             shader = cmds.shadingNode('lambert', asShader=True, name=shaderName)
@@ -267,7 +284,8 @@ def aoMapAdjust(taImage, imge=r"D:\HKW\mayacontroller\turtle\bakedTextures\baked
     img = img.convert('L')
     pixel = []
     for i in range(256):
-        pixel.append(img.getpixel((i, 2)))
+        pixel.append(img.getpixel((i, 0)))
+        pixel.append(img.getpixel((0,i)))
 
     cvimg = cv2.imread(imge)
     ret, thresh3 = cv2.threshold(cvimg, min(pixel), 255, cv2.THRESH_TRUNC)
@@ -280,3 +298,4 @@ def aoMapAdjust(taImage, imge=r"D:\HKW\mayacontroller\turtle\bakedTextures\baked
     img1 = Image.new('RGBA', (512, 512), (0, 0, 0, 0))
     img1.putalpha(img)
     img1.save(taImage)
+

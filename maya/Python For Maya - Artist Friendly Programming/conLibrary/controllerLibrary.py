@@ -82,7 +82,7 @@ class ControllerLibrary(dict):
 
         path = os.path.join(directory, '%s.jpg' % name)
 
-        cmds.viewFit()  # 聚焦物体
+        cmds.viewFit(f=10.0)  # 聚焦物体
         cmds.setAttr('defaultRenderGlobals.imageFormat', 8)  # 设置默认渲染器图片格式 8位jpg
         # 使用playblast 的方式保存截图
         cmds.playblast(completeFilename=path, forceOverwrite=True, format='image', width=200, height=200,
