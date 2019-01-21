@@ -268,6 +268,7 @@ class IntmeCommodity(dict):
 
 
 def run():
+
     name = []
     a = IntmeCommodity()
     a.findCommodity()
@@ -283,9 +284,11 @@ def aoMapAdjust(taImage, imge=r"D:\HKW\mayacontroller\turtle\bakedTextures\baked
     img = Image.open(imge)
     img = img.convert('L')
     pixel = []
-    for i in range(256):
+    for i in range(512):
         pixel.append(img.getpixel((i, 0)))
         pixel.append(img.getpixel((0,i)))
+        pixel.append(img.getpixel((i,511)))
+        pixel.append(img.getpixel((511,i)))
 
     cvimg = cv2.imread(imge)
     ret, thresh3 = cv2.threshold(cvimg, min(pixel), 255, cv2.THRESH_TRUNC)
