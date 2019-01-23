@@ -68,7 +68,6 @@ class ControllerLibrary(dict):
             info['name'] = name
             info['path'] = path
             self[name] = info
-        print self
 
     def load(self, name):
         path = self[name]['path']

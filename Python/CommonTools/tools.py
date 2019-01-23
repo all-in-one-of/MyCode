@@ -41,7 +41,6 @@ def copyfile(files, path=None, nummber=1):
             for file in files:
                 suffix = file.split('.')[1]
                 newFile = file.split('.')[0] + '_%s.' % i + suffix
-                print newFile
                 shutil.copyfile(file, newFile)
 
 
