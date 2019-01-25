@@ -215,8 +215,8 @@ class InTimeWebUpload():
         position.clear()
         position.send_keys(commodity_info['排序'])
 
-        submit = driver.find_element_by_css_selector('#form-add-edit > div:nth-child(22) > div > input')  # 提交
-        submit.click()
+        # submit = driver.find_element_by_css_selector('#form-add-edit > div:nth-child(22) > div > input')  # 提交
+        # submit.click()
         time.sleep(4)
 
     def up_option(self, commodity_info, revise):
@@ -286,7 +286,6 @@ class InTimeWebUpload():
                     colseAlert()
                     # up_file.append(option_model_file_button)
                     i += 1
-                print('aaaa')
 
             elif len(option[1:]) < len(commodity_info['规格']['finally']['模型'].keys()):
                 add.click()

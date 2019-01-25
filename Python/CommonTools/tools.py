@@ -7,6 +7,7 @@ import datetime
 import time
 import numpy
 import cv2
+import name
 
 def findSpecifiedFile(path, suffix=''):
     '''
@@ -67,18 +68,134 @@ def readJson(path):
         c = eval(b)  # 转回字典
     return c  # 返回字典
 
+
 def changeTime(allTime):
-    day = 24*60*60
-    hour = 60*60
+    day = 24 * 60 * 60
+    hour = 60 * 60
     min = 60
-    if allTime <60:
-        return  "%d sec"%math.ceil(allTime)
-    elif  allTime > day:
-        days = divmod(allTime,day)
-        return "%d days, %s"%(int(days[0]),changeTime(days[1]))
+    if allTime < 60:
+        return "%d sec" % math.ceil(allTime)
+    elif allTime > day:
+        days = divmod(allTime, day)
+        return "%d days, %s" % (int(days[0]), changeTime(days[1]))
     elif allTime > hour:
-        hours = divmod(allTime,hour)
-        return '%d hours, %s'%(int(hours[0]),changeTime(hours[1]))
+        hours = divmod(allTime, hour)
+        return '%d hours, %s' % (int(hours[0]), changeTime(hours[1]))
     else:
-        mins = divmod(allTime,min)
-        return "%d mins, %d sec"%(int(mins[0]),math.ceil(mins[1]))
+        mins = divmod(allTime, min)
+        return "%d mins, %d sec" % (int(mins[0]), math.ceil(mins[1]))
+
+
+def loadDatadet(infile):
+    with open(infile,'r',encoding='utf-8') as f:
+        sourceInLine=f.readlines()
+        dataset=[]
+        for line in sourceInLine:
+            temp1=line.strip('\n')
+            temp2=temp1.split('\t')
+            dataset.append(temp2)
+        return dataset
+
+
+
+
+if __name__ == '__main__':
+    num=0
+    mun =0
+    path = r'F:\Share\2018\rdx'
+
+    tex={}
+    for n in os.listdir(path):
+        gg = ['收藏级', '优等级', '实用级', '一等级']
+        info = {}
+        version_info = {}
+
+        model = {}
+        mesh = {}
+        md = {}
+        num = 0
+        mun = 0
+        directory = os.path.join(path, n)
+
+        if os.path.isdir(directory):
+            json_file = os.path.join(directory,'%s.json' % n)
+
+            tex['baseColor'] = os.path.join(directory,[i for i in os.listdir(directory) if i.endswith('Diffuse.png') or i.endswith('_b.png')][0])
+            tex['normals'] = os.path.join(directory,[i for i in os.listdir(directory) if i.endswith('Normals.png') or i.endswith('_n.png')][0])
+            tex['ambientOcclusion'] = os.path.join(directory,[i for i in os.listdir(directory) if i.endswith('AmbientOcclusion.png') or i.endswith('_ao.png')][0])
+            tex['shadow'] = os.path.join(directory,[i for i in os.listdir(directory) if i.endswith('_s.png')][0])
+
+            tex['metallic'] = os.path.join(directory,[i for i in os.listdir(directory) if i.endswith('_m.png') ][0]) if [i for i in os.listdir(directory) if i.endswith('_m.png') ] else ''
+            tex['roughness'] = os.path.join(directory,[i for i in os.listdir(directory) if i.endswith('_r.png') ][0]) if [i for i in os.listdir(directory) if i.endswith('_r.png') ] else ''
+            tex['emissive'] = os.path.join(directory,[i for i in os.listdir(directory) if i.endswith('_e.png') ][0]) if [i for i in os.listdir(directory) if i.endswith('_e.png') ] else ''
+
+
+
+
+            mesh['maya文件地址']=''
+            mesh['fbx文件地址']=os.path.join(directory,[i for i in os.listdir(directory) if i.endswith('.fbx')][0])
+            mesh['价格']=0
+            mesh['sku']=''
+            mesh['渲染图片地址']=os.path.join(directory,[i for i in os.listdir(directory) if i.endswith('.jpg')][0])
+            mesh['贴图地址']=tex
+
+            version_info['模型'] = mesh
+
+            version_info['MD5码'] = ''
+            version_info['提交时间'] = ''
+            version_info['note'] = ''
+
+            for i in [i for i in os.listdir(directory) if i.endswith('manifest') and i.startswith('m') is False]:
+                md[gg[num]]=version_info
+
+                num+=1
+
+
+            model['finally']=md
+
+            info['sku'] = n
+            info['商品名称'] = name.name[n]
+            info['副标题']=''
+            info['价格']=0
+            info['所属商家']='荣鼎轩红木'
+            info['所属品牌']='荣鼎轩'
+            info['所属分类']='客厅'
+            info['所属系列']=''
+            info['商品图片地址']=os.path.join(directory,'%s.jpg' % n)
+            info['所属套装']=''
+            info['商品长宽高']=''
+            info['3dMax地址']=''
+            info['是否有金属配件']=''
+            info['是否有发光配件']=''
+            info['备注']=''
+            info['制作类型']='普通类型'
+            info['对接人']='王'
+            info['制作人']='何'
+            info['审核人']='韩'
+            info['录入时间']=''
+            info['开始制作时间']=''
+            info['参考图地址']=''
+            info['obj文件地址']=''
+            info['规格']=model
+
+
+
+            with open(json_file,'w',encoding='utf-8') as f:
+                json.dump(info,f,indent=2,ensure_ascii=False)
+
+            with open(json_file,'r+',encoding='utf-8') as f:
+                j = 0
+                info = json.load(f)
+                for i in info['规格']['finally'].keys():
+                    info['规格']['finally'][i]['模型']['模型包地址']=os.path.join(directory,[i for i in os.listdir(directory) if i.endswith('.manifest') and i.startswith('m') is False][j].split('.')[0])
+                    info['规格']['finally'][i]['模型']['sku']=[i for i in os.listdir(directory) if i.endswith('.manifest') and i.startswith('m') is False][j].split('.')[0]
+                    info['规格']['finally'][i]['MD5码']=loadDatadet(r"F:\Share\2018\rdx\%s\%s.manifest" %(info['sku'],info['规格']['finally'][i]['模型']['sku']))[5][0].split(' ')[5]
+                    info['规格']['finally'][i]['材质包地址']=os.path.join(directory,[i for i in os.listdir(directory) if i.startswith('m') and i.endswith('.manifest') is False][0])
+                    j+=1
+
+            with open(json_file, 'w', encoding='utf-8') as f:
+                json.dump(info, f, indent=2, ensure_ascii=False)
+            print(n)
+                # break
+        else:
+            print('lala---------%s' % n)
