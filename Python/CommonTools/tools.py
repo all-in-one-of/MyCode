@@ -1,5 +1,6 @@
 # coding=utf-8
 import json
+import math
 import os
 import shutil
 import datetime
@@ -66,8 +67,18 @@ def readJson(path):
         c = eval(b)  # 转回字典
     return c  # 返回字典
 
-# print time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-
-# path = r"C:\Users\HYC\.anaconda\navigator\images\072618-webinar-AE-FUheroimage-01-3.jpg"
-# tpath = r'D:\locaMaya'
-#
+def changeTime(allTime):
+    day = 24*60*60
+    hour = 60*60
+    min = 60
+    if allTime <60:
+        return  "%d sec"%math.ceil(allTime)
+    elif  allTime > day:
+        days = divmod(allTime,day)
+        return "%d days, %s"%(int(days[0]),changeTime(days[1]))
+    elif allTime > hour:
+        hours = divmod(allTime,hour)
+        return '%d hours, %s'%(int(hours[0]),changeTime(hours[1]))
+    else:
+        mins = divmod(allTime,min)
+        return "%d mins, %d sec"%(int(mins[0]),math.ceil(mins[1]))
