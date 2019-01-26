@@ -126,7 +126,7 @@ class InTimeWebUpload():
             'body > div > div:nth-child(3) > table > tbody > tr > td.td-manage > a:nth-child(1)')  # 编辑按钮
         edit_button.click()
         driver.switch_to.frame(driver.find_element_by_tag_name("iframe"))
-        self.up_option(commodity_info, revise)
+        self.upload_commodity(commodity_info, revise)
 
         # for name,info in commodity_info['规格']['finally']['模型'].items():
         #     for option_name in option_names:
@@ -215,8 +215,8 @@ class InTimeWebUpload():
         position.clear()
         position.send_keys(commodity_info['排序'])
 
-        # submit = driver.find_element_by_css_selector('#form-add-edit > div:nth-child(22) > div > input')  # 提交
-        # submit.click()
+        submit = driver.find_element_by_css_selector('#form-add-edit > div:nth-child(22) > div > input')  # 提交
+        submit.click()
         time.sleep(4)
 
     def up_option(self, commodity_info, revise):
