@@ -304,11 +304,12 @@ if __name__ == '__main__':
     driver = openChrome()
     it = InTimeWebUpload()
     it.login()
+
     # for i in findSpecifiedFile(r'D:\test','json'):
     #
     #     it.add_commodity(i)
 
-    it.revise_commodity(findSpecifiedFile(r'D:\test', 'json')[2])
+    it.add_commodity(findSpecifiedFile(r'D:\test', 'json')[2])
 
     end = time.time()
     print(changeTime(end - start))

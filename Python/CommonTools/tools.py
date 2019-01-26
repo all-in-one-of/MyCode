@@ -14,7 +14,15 @@ import win32con
 from time import sleep
 from pykeyboard import PyKeyboard
 
+
 # 529478
+
+def get_all_hwnd(hwnd,mouse):
+    if win32gui.IsWindow(hwnd) and win32gui.IsWindowEnabled(hwnd) and win32gui.IsWindowVisible(hwnd):
+        hwnd_title.update({hwnd:win32gui.GetWindowText(hwnd)})
+
+
+
 
 def foo(hwnd, mouse):
     titles = set()
@@ -26,6 +34,7 @@ def foo(hwnd, mouse):
             print(a)
             win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)
     titles.add(GetWindowText(hwnd))
+
 
 def findSpecifiedFile(path, suffix=''):
     '''
@@ -115,170 +124,174 @@ def loadDatadet(infile):
         return dataset
 
 
-# if __name__ == '__main__':
-#     num = 0
-#     mun = 0
-#     path = r'F:\Share\2018\rdx'
-#
-#     tex = {}
-#     for n in os.listdir(path):
-#         gg = ['收藏级', '优等级', '实用级', '一等级']
-#         info = {}
-#         version_info = {}
-#
-#         model = {}
-#         mesh = {}
-#         md = {}
-#         num = 0
-#         mun = 0
-#         directory = os.path.join(path, n)
-#
-#         if os.path.isdir(directory):
-#             json_file = os.path.join(directory, '%s.json' % n)
-#
-#             tex['baseColor'] = os.path.join(directory, [i for i in os.listdir(directory) if
-#                                                         i.endswith('Diffuse.png') or i.endswith('_b.png')][0])
-#             tex['normals'] = os.path.join(directory, [i for i in os.listdir(directory) if
-#                                                       i.endswith('Normals.png') or i.endswith('_n.png')][0])
-#             tex['ambientOcclusion'] = os.path.join(directory, [i for i in os.listdir(directory) if
-#                                                                i.endswith('AmbientOcclusion.png') or i.endswith(
-#                                                                    '_ao.png')][0])
-#             tex['shadow'] = os.path.join(directory, [i for i in os.listdir(directory) if i.endswith('_s.png')][0])
-#
-#             tex['metallic'] = os.path.join(directory,
-#                                            [i for i in os.listdir(directory) if i.endswith('_m.png')][0]) if [i for i in
-#                                                                                                               os.listdir(
-#                                                                                                                   directory)
-#                                                                                                               if
-#                                                                                                               i.endswith(
-#                                                                                                                   '_m.png')] else ''
-#             tex['roughness'] = os.path.join(directory,
-#                                             [i for i in os.listdir(directory) if i.endswith('_r.png')][0]) if [i for i
-#                                                                                                                in
-#                                                                                                                os.listdir(
-#                                                                                                                    directory)
-#                                                                                                                if
-#                                                                                                                i.endswith(
-#                                                                                                                    '_r.png')] else ''
-#             tex['emissive'] = os.path.join(directory,
-#                                            [i for i in os.listdir(directory) if i.endswith('_e.png')][0]) if [i for i in
-#                                                                                                               os.listdir(
-#                                                                                                                   directory)
-#                                                                                                               if
-#                                                                                                               i.endswith(
-#                                                                                                                   '_e.png')] else ''
-#
-#             mesh['maya文件地址'] = ''
-#             mesh['fbx文件地址'] = os.path.join(directory, [i for i in os.listdir(directory) if i.endswith('.fbx')][0])
-#             mesh['价格'] = 0
-#             mesh['sku'] = ''
-#             mesh['渲染图片地址'] = os.path.join(directory, [i for i in os.listdir(directory) if i.endswith('.jpg')][0])
-#             mesh['贴图地址'] = tex
-#
-#             version_info['模型'] = mesh
-#
-#             version_info['MD5码'] = ''
-#             version_info['提交时间'] = ''
-#             version_info['note'] = ''
-#
-#             for i in [i for i in os.listdir(directory) if i.endswith('manifest') and i.startswith('m') is False]:
-#                 md[gg[num]] = version_info
-#
-#                 num += 1
-#
-#             model['finally'] = md
-#
-#             info['sku'] = n
-#             info['商品名称'] = name.name[n]
-#             info['副标题'] = ''
-#             info['价格'] = 0
-#             info['所属商家'] = '荣鼎轩红木'
-#             info['所属品牌'] = '荣鼎轩'
-#             info['所属分类'] = '客厅'
-#             info['所属系列'] = ''
-#             info['商品图片地址'] = os.path.join(directory, '%s.jpg' % n)
-#             info['所属套装'] = ''
-#             info['商品长宽高'] = ''
-#             info['3dMax地址'] = ''
-#             info['是否有金属配件'] = ''
-#             info['是否有发光配件'] = ''
-#             info['备注'] = ''
-#             info['制作类型'] = '普通类型'
-#             info['对接人'] = '王'
-#             info['制作人'] = '何'
-#             info['审核人'] = '韩'
-#             info['录入时间'] = ''
-#             info['开始制作时间'] = ''
-#             info['参考图地址'] = ''
-#             info['obj文件地址'] = ''
-#             info['规格'] = model
-#
-#             with open(json_file, 'w', encoding='utf-8') as f:
-#                 json.dump(info, f, indent=2, ensure_ascii=False)
-#
-#             with open(json_file, 'r+', encoding='utf-8') as f:
-#                 j = 0
-#                 info = json.load(f)
-#                 for i in info['规格']['finally'].keys():
-#                     info['规格']['finally'][i]['模型']['模型包地址'] = os.path.join(directory,
-#                                                                            [i for i in os.listdir(directory) if
-#                                                                             i.endswith('.manifest') and i.startswith(
-#                                                                                 'm') is False][j].split('.')[0])
-#                     info['规格']['finally'][i]['模型']['sku'] = \
-#                     [i for i in os.listdir(directory) if i.endswith('.manifest') and i.startswith('m') is False][
-#                         j].split('.')[0]
-#                     info['规格']['finally'][i]['MD5码'] = loadDatadet(
-#                         r"F:\Share\2018\rdx\%s\%s.manifest" % (info['sku'], info['规格']['finally'][i]['模型']['sku']))[5][
-#                         0].split(' ')[5]
-#                     info['规格']['finally'][i]['材质包地址'] = os.path.join(directory, [i for i in os.listdir(directory) if
-#                                                                                  i.startswith('m') and i.endswith(
-#                                                                                      '.manifest') is False][0])
-#                     j += 1
-#
-#             with open(json_file, 'w', encoding='utf-8') as f:
-#                 json.dump(info, f, indent=2, ensure_ascii=False)
-#             print(n)
-#             # break
-#         else:
-#             print('lala---------%s' % n)
-
-
-
-def get_all_hwnd(hwnd,mouse):
-    if win32gui.IsWindow(hwnd) and win32gui.IsWindowEnabled(hwnd) and win32gui.IsWindowVisible(hwnd):
-        hwnd_title.update({hwnd:win32gui.GetWindowText(hwnd)})
-
-
 if __name__ == '__main__':
-    kk = PyKeyboard()
+    num = 0
+    mun = 0
+    path = r'F:\Share\2018\rdx'
 
-    while True:
-        hwnd_title = {}
+    tex = {}
+    for n in os.listdir(path):
+        gg = ['收藏级', '优等级', '实用级', '一等级']
+        info = {}
+        version_info = {}
 
-        win32gui.EnumWindows(get_all_hwnd, 0)
+        model = {}
+        mesh = {}
+        md = {}
+        num = 0
+        mun = 0
+        directory = os.path.join(path, n)
 
-        for h, t in hwnd_title.items():
-            if t == "缺少外部文件":
-                win32gui.PostMessage(h, win32con.WM_CLOSE, 0, 0)
-                print(t)
-            elif t == "文件加载: Gamma 和 LUT 设置不匹配":
-                # win32gui.PostMessage(h, win32con.WM_CLOSE, 0, 0)
-                kk.tap_key(kk.enter_key)
-                time.sleep(1)
+        if os.path.isdir(directory):
+            json_file = os.path.join(directory, '%s.json' % n)
 
-            elif t == "文件加载: 单位不匹配":
-                # win32gui.PostMessage(h, win32con.WM_CLOSE, 0, 0)
-                kk.tap_key(kk.enter_key)
-                time.sleep(1)
+            tex['baseColor'] = os.path.join(directory, [i for i in os.listdir(directory) if
+                                                        i.endswith('Diffuse.png') or i.endswith('_b.png')][0])
+            tex['normals'] = os.path.join(directory, [i for i in os.listdir(directory) if
+                                                      i.endswith('Normals.png') or i.endswith('_n.png')][0])
+            tex['ambientOcclusion'] = os.path.join(directory, [i for i in os.listdir(directory) if
+                                                               i.endswith('AmbientOcclusion.png') or i.endswith(
+                                                                   '_ao.png')][0])
+            tex['shadow'] = os.path.join(directory, [i for i in os.listdir(directory) if i.endswith('_s.png')][0])
 
-            elif t == "V-Ray 警告":
-                kk.tap_key(kk.enter_key)
-                time.sleep(1)
+            tex['metallic'] = os.path.join(directory,
+                                           [i for i in os.listdir(directory) if i.endswith('_m.png')][0]) if [i for i in
+                                                                                                              os.listdir(
+                                                                                                                  directory)
+                                                                                                              if
+                                                                                                              i.endswith(
+                                                                                                                  '_m.png')] else ''
+            tex['roughness'] = os.path.join(directory,
+                                            [i for i in os.listdir(directory) if i.endswith('_r.png')][0]) if [i for i
+                                                                                                               in
+                                                                                                               os.listdir(
+                                                                                                                   directory)
+                                                                                                               if
+                                                                                                               i.endswith(
+                                                                                                                   '_r.png')] else ''
+            tex['emissive'] = os.path.join(directory,
+                                           [i for i in os.listdir(directory) if i.endswith('_e.png')][0]) if [i for i in
+                                                                                                              os.listdir(
+                                                                                                                  directory)
+                                                                                                              if
+                                                                                                              i.endswith(
+                                                                                                                  '_e.png')] else ''
 
-                # win32gui.PostMessage(h, win32con.WM_CLOSE, 0, 0)
+            mesh['maya文件地址'] = ''
+            mesh['fbx文件地址'] = os.path.join(directory, [i for i in os.listdir(directory) if i.endswith('.fbx')][0])
+            mesh['价格'] = 0
+            mesh['sku'] = ''
+            mesh['渲染图片地址'] = os.path.join(directory, [i for i in os.listdir(directory) if i.endswith('.jpg')][0])
+            mesh['贴图地址'] = tex
 
 
-            print(h,t)
+            # version_info['MD5码'] = ''
+            # version_info['提交时间'] = ''
+            # version_info['note'] = ''
+            md['提交时间'] = ''
+            md['note'] = ''
+            md['材质包地址'] = ''
+            md['MD5码'] = ''
+
+            for i in [i for i in os.listdir(directory) if i.endswith('manifest') and i.startswith('m') is False]:
+                version_info['模型'] = mesh
+                md[gg[num]] = version_info
+                md[gg[num]]['模型包地址'] = i
+                md.update(md)
+                num += 1
 
 
-        time.sleep(1)
+
+
+            model['finally'] = md
+
+            info['sku'] = n
+            info['商品名称'] = name.name[n]
+            info['副标题'] = ''
+            info['价格'] = 0
+            info['所属商家'] = '荣鼎轩红木'
+            info['所属品牌'] = '荣鼎轩'
+            info['所属分类'] = '客厅'
+            info['所属系列'] = ''
+            info['商品图片地址'] = os.path.join(directory, '%s.jpg' % n)
+            info['所属套装'] = ''
+            info['商品长宽高'] = ''
+            info['3dMax地址'] = ''
+            info['是否有金属配件'] = ''
+            info['是否有发光配件'] = ''
+            info['备注'] = ''
+            info['制作类型'] = '普通类型'
+            info['对接人'] = '王'
+            info['制作人'] = '何'
+            info['审核人'] = '韩'
+            info['录入时间'] = ''
+            info['开始制作时间'] = ''
+            info['参考图地址'] = ''
+            info['obj文件地址'] = ''
+            info['规格'] = model
+
+            with open(json_file, 'w', encoding='utf-8') as f:
+                json.dump(info, f, indent=2, ensure_ascii=False)
+
+            # with open(json_file, 'r+', encoding='utf-8') as f:
+            #     j = 0
+            #     info = json.load(f)
+            #     for i in gg:
+            #
+            #         info['规格']['finally'][i]['模型']['模型包地址'] = os.path.join(directory,
+            #                                                                [i for i in os.listdir(directory) if
+            #                                                                 i.endswith('.manifest') and i.startswith(
+            #                                                                     'm') is False][j].split('.')[0])
+            #         info['规格']['finally'][i]['模型']['sku'] = \
+            #         [i for i in os.listdir(directory) if i.endswith('.manifest') and i.startswith('m') is False][
+            #             j].split('.')[0]
+            #         info['规格']['finally']['MD5码'] = loadDatadet(
+            #             r"F:\Share\2018\rdx\%s\%s.manifest" % (info['sku'], info['规格']['finally'][i]['模型']['sku']))[5][
+            #             0].split(' ')[5]
+            #         info['规格']['finally']['材质包地址'] = os.path.join(directory, [i for i in os.listdir(directory) if
+            #                                                                      i.startswith('m') and i.endswith(
+            #                                                                          '.manifest') is False][0])
+            #         j += 1
+            #
+            # with open(json_file, 'w', encoding='utf-8') as f:
+            #     json.dump(info, f, indent=2, ensure_ascii=False)
+            print(n)
+            break
+        else:
+            print('lala---------%s' % n)
+
+
+# if __name__ == '__main__':
+#     kk = PyKeyboard()
+#
+#     while True:
+#         hwnd_title = {}
+#
+#         win32gui.EnumWindows(get_all_hwnd, 0)
+#
+#         for h, t in hwnd_title.items():
+#             if t == "缺少外部文件":
+#                 win32gui.PostMessage(h, win32con.WM_CLOSE, 0, 0)
+#                 print(t)
+#             elif t == "文件加载: Gamma 和 LUT 设置不匹配":
+#                 win32gui.SetForegroundWindow(h)
+#                 # win32gui.PostMessage(h, win32con.WM_CLOSE, 0, 0)
+#                 kk.tap_key(kk.enter_key)
+#                 time.sleep(1)
+#
+#             elif t == "文件加载: 单位不匹配":
+#                 # win32gui.PostMessage(h, win32con.WM_CLOSE, 0, 0)
+#                 win32gui.SetForegroundWindow(h)
+#                 kk.tap_key(kk.enter_key)
+#                 time.sleep(1)
+#
+#             elif t == "V-Ray 警告":
+#                 win32gui.SetForegroundWindow(h)
+#                 kk.tap_key(kk.enter_key)
+#                 time.sleep(1)
+#
+#                 # win32gui.PostMessage(h, win32con.WM_CLOSE, 0, 0)
+#
+#             print(h, t)
+#
+#         time.sleep(1)
