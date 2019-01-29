@@ -128,10 +128,6 @@ class InTimeWebUpload():
         driver.switch_to.frame(driver.find_element_by_tag_name("iframe"))
         self.upload_commodity(commodity_info, revise)
 
-        # for name,info in commodity_info['规格']['finally']['模型'].items():
-        #     for option_name in option_names:
-        #         if name ==option_name:
-
     def upload_commodity(self, commodity_info, revise=False):
         up_file = []
         up_image = []
@@ -309,10 +305,11 @@ if __name__ == '__main__':
     #
     #     it.add_commodity(i)
 
-    it.add_commodity(findSpecifiedFile(r'D:\test', 'json')[2])
+    # it.add_commodity(findSpecifiedFile(r'D:\test', 'json')[2])
 
     end = time.time()
     print(changeTime(end - start))
     # modification(driver)
 
     # print(commodity_info['finally']['渲染图片地址'].replace('//','\\'))
+
