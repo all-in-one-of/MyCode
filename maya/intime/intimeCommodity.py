@@ -8,18 +8,48 @@ import ast
 from maya import cmds
 import logging
 import os
-from PySide2 import QtWidgets, QtCore, QtGui
 import pymel.core as pm
 import cv2
 
-from CommonTools import tools
+def createDirectory(directory):
+    '''
+    创建路径，如果文件夹不存在，就创建
+    :param directory (str): 创建文件夹
+    :return:
+    '''
+    if not os.path.exists(directory):
+        os.mkdir(directory)
 
 JSONFILESPATH = r"D:\jsons"
 PROJECTPATH = r'D:\testProject'
 MAYAPROJECT = cmds.workspace(fn=True)
 
+def aoMapAdjust(taImage, imge=r"D:\HKW\mayacontroller\turtle\bakedTextures\baked_beauty_pPlaneShape1.png"):
+    img = Image.open(imge)
+    img = img.convert('L')
+    pixel = []
+    for i in range(512):
+        pixel.append(img.getpixel((i, 0)))
+        pixel.append(img.getpixel((0,i)))
+        pixel.append(img.getpixel((i,511)))
+        pixel.append(img.getpixel((511,i)))
+
+    cvimg = cv2.imread(imge)
+    ret, thresh3 = cv2.threshold(cvimg, min(pixel), 255, cv2.THRESH_TRUNC)
+    cv2.imwrite(imge, thresh3)
+    img = Image.open(imge)
+    img = img.convert('L')
+    img = ImageOps.autocontrast(img)
+    img = ImageChops.invert(img)
+    img = img.filter(ImageFilter.GaussianBlur(2.5))
+    img1 = Image.new('RGBA', (512, 512), (0, 0, 0, 0))
+    img1.putalpha(img)
+    img1.save(taImage)
+
 
 class IntmeCommodity(dict):
+
+
     def initializeTurtle(self):
         '''
         海龟烘培ao
@@ -203,14 +233,14 @@ class IntmeCommodity(dict):
         :return:
         """
         self.clear()
-        files = os.listdir(directory)
-        for file in files:
-            name, ext = os.path.splitext(file)
-            commodityInfo = os.path.join(directory, file)
-            with open(commodityInfo, 'r') as f:
+        jsonFiles = findSpecifiedFile(directory,'json')
+        for file in jsonFiles:
+            with open(file, 'r') as f:
                 info = json.load(f)
+                name = info['sku']
 
             self[name] = eval(json.dumps(info, encoding="utf-8", ensure_ascii=False))
+        return jsonFiles
 
     def loadMayaFile(self, name, versions):
         """
@@ -254,12 +284,12 @@ class IntmeCommodity(dict):
         """
         date = datetime.date.today()
         nameDirectory = os.path.join(directory, name)
-        tools.createDirectory(nameDirectory)
+        createDirectory(nameDirectory)
         dateDirectory = os.path.join(nameDirectory, '%s' % date)
-        tools.createDirectory(dateDirectory)
+        createDirectory(dateDirectory)
         mayaDirectory = os.path.join(dateDirectory, 'maya')
 
-        tools.createDirectory(mayaDirectory)
+        createDirectory(mayaDirectory)
         shutil.copy(self.saveMayaFile(name), mayaDirectory)
         self[name]['%s' % date]['note'] = note
         self[name]['%s' % date]['maya文件地址'] = os.path.join(dateDirectory, '%s.ma' % name)
@@ -280,25 +310,18 @@ def run():
     # a.loadMayaFile(name=name[0], versions='2019-01-12')
 
 
-def aoMapAdjust(taImage, imge=r"D:\HKW\mayacontroller\turtle\bakedTextures\baked_beauty_pPlaneShape1.png"):
-    img = Image.open(imge)
-    img = img.convert('L')
-    pixel = []
-    for i in range(512):
-        pixel.append(img.getpixel((i, 0)))
-        pixel.append(img.getpixel((0,i)))
-        pixel.append(img.getpixel((i,511)))
-        pixel.append(img.getpixel((511,i)))
 
-    cvimg = cv2.imread(imge)
-    ret, thresh3 = cv2.threshold(cvimg, min(pixel), 255, cv2.THRESH_TRUNC)
-    cv2.imwrite(imge, thresh3)
-    img = Image.open(imge)
-    img = img.convert('L')
-    img = ImageOps.autocontrast(img)
-    img = ImageChops.invert(img)
-    img = img.filter(ImageFilter.GaussianBlur(2.5))
-    img1 = Image.new('RGBA', (512, 512), (0, 0, 0, 0))
-    img1.putalpha(img)
-    img1.save(taImage)
-
+def findSpecifiedFile(path, suffix=''):
+    '''
+    查找指定文件
+    :param path: 根目录
+    :param suffix: 格式，默认是空
+    :return: 文件地址列表
+    '''
+    _file = []
+    path = path.decode('utf-8')
+    for root, dirs, fils in os.walk(path):
+        for file in fils:
+            if file.endswith(suffix):
+                _file.append(os.path.join(root, file))
+    return _file
