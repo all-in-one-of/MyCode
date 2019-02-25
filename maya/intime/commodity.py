@@ -1,21 +1,41 @@
 # coding=utf-8
 from PySide2 import QtWidgets, QtCore, QtGui
-# import pymel.core as pm
-from functools import partial
-from shiboken2 import wrapInstance
+import pymel.core as pm
 from maya import OpenMayaUI as omui
 from maya import cmds
 import customMaya
-# from intimeCommodity import *
 
 import logging
+import Qt
 
-# # 初始化logging系统
-# logging.basicConfig()
-# # 设置名称 可以针对当前工具进行记录
-# logger = logging.getLogger('LightingManager')
-# # 设置信息反馈的模式
-# logger.setLevel(logging.DEBUG)
+# 初始化logging系统
+logging.basicConfig()
+# 设置名称 可以针对当前工具进行记录
+logger = logging.getLogger()
+# 设置信息反馈的模式
+logger.setLevel(logging.DEBUG)
+
+if Qt.__binding__ == 'PySide':
+    logger.debug('Using PySide with shiboken')
+    from shiboken import wrapInstance
+    from Qt.QtCore import Signal
+elif Qt.__binding__.startswith('PyQt'):
+    logger.debug('Using PyQt with sip')
+    from sip import wrapinstance as wrapInstance
+    from Qt.QtCore import pyqtSignal as Signal
+else:
+    logger.debug('Using PySide2 with shiboken2')
+    from shiboken2 import wrapInstance
+    from Qt.QtCore import Signal
+
+
+# 获取Maya的主窗口 用于 dock 窗口
+def getMayaMainWindow():
+    # 通过OpenMayaUI API 获取Maya主窗口
+    win = omui.MQtUtil_mainWindow()
+    # 将窗口转换成Python可以识别的东西 这里是将它转换为QMainWindow
+    ptr = wrapInstance(long(win), QtWidgets.QMainWindow)
+    return ptr
 
 
 DOCKNAME = u'产品库'
@@ -29,7 +49,7 @@ def getDock(name=DOCKNAME):
     # 生成可以dock的Maya窗口
     # dockToMainWindow 将窗口dock进右侧的窗口栏中
     # label 设置标签名称
-    ctrl = cmds.workspaceControl(name, dockToMainWindow=('right', 1), label=DOCKNAME)
+    ctrl = pm.workspaceControl(name, dockToMainWindow=('right', 1), label=DOCKNAME)
     # 通过OpenMayaUI API 获取窗口相关的 Qt 信息
     qtCtrl = omui.MQtUtil_findControl(ctrl)
     # 将 qtCtrl 转换为Python可以识别的形式
@@ -37,19 +57,13 @@ def getDock(name=DOCKNAME):
     return ptr
 
 
+
 def deleteDock(name=DOCKNAME):
     # 查询窗口是否存在
-    if cmds.workspaceControl(name, query=True, exists=True):
+    if pm.workspaceControl(name, query=True, exists=True):
         # 存在即删除
-        cmds.deleteUI(name)
+        pm.deleteUI(name)
 
-
-def getMayaMainWindow():
-    # 通过OpenMayaUI API 获取Maya主窗口
-    win = omui.MQtUtil_mainWindow()
-    # 将窗口转换成Python可以识别的东西 这里是将它转换为QMainWindow
-    ptr = wrapInstance(long(win), QtWidgets.QMainWindow)
-    return ptr
 
 
 class commodityUI(QtWidgets.QWidget):
@@ -272,7 +286,7 @@ class QCustomQWidget(QtWidgets.QWidget):
         self.textQVBoxLayout.addWidget(self.textDownQLabel)
         self.allQHBoxLayout = QtWidgets.QHBoxLayout()
         self.iconQLabel = QtWidgets.QPushButton()
-        self.allQHBoxLayout.addWidget(self.iconQLabel, 0)
+        self.allQHBoxLayout.addWidget(self.iconQLabel)
         self.allQHBoxLayout.addLayout(self.textQVBoxLayout, 1)
         self.allQHBoxLayout.addLayout(self.aaa)
         self.setLayout(self.allQHBoxLayout)
@@ -294,19 +308,41 @@ class QCustomQWidget(QtWidgets.QWidget):
         # pass
         self.iconQLabel.setIconSize(QtCore.QSize(50, 50))
         self.iconQLabel.setIcon(QtGui.QPixmap(imagePath))
-        self.iconQLabel.setFixedSize(52, 52)
-
+        # self.iconQLabel.setFixedSize(52, 52)
         self.iconQLabel.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
 
 
-class uiTest(QtWidgets.QDialog):
+class uiTest(QtWidgets.QWidget):
 
-    def __init__(self, parent=getMayaMainWindow()):
-        super(uiTest, self).__init__(parent)
+    def __init__(self,dock=True):
+        if dock:
+            parent = getDock(DOCKNAME)
+        else:
+            # 删除dock窗口
+            deleteDock(DOCKNAME)
+
+            try:
+                # 删除窗口 如果窗口本身不存在 用try可以让代码不会停止运行并报错
+                pm.deleteUI(DOCKNAME)
+
+            except:
+                logger.debug('No previous UI exists')
+
+            # 获取Maya主窗口 并将窗口负载在Qt窗口上
+            parent = QtWidgets.QDialog(parent=getMayaMainWindow())
+            parent.setObjectName(DOCKNAME)
+            parent.setWindowTitle(DOCKNAME)
+            layout = QtWidgets.QVBoxLayout(parent)
+
+        if not dock:
+            parent.show()
+
+        super(uiTest, self).__init__(parent=parent)
 
         self.createWidgets()
         self.createLayouts()
 
+        self.parent().layout().addWidget(self)
     def createWidgets(self):
         size = 50
         self.button1 = QtWidgets.QPushButton('lllaaaa')
@@ -316,16 +352,20 @@ class uiTest(QtWidgets.QDialog):
         self.listTest.setIconSize(QtCore.QSize(size, size))  # 设置图标大小
 
         # self.listTest.addItem('aaa')
-        self.item1 = QtWidgets.QListWidgetItem('bbbbb')
-        self.item2 = QtWidgets.QListWidgetItem('aaaaa')
+        self.item1 = QtWidgets.QListWidgetItem('巴巴爸爸')
+        self.item2 = QtWidgets.QListWidgetItem('啊啊啊')
 
         myQCustomQWidget = QCustomQWidget()
         myQCustomQWidget.setIcon("F:\\Share\\2018\\rdx\\a003\\a003.jpg")
         myQCustomQWidget.setTextUp('上')
         myQCustomQWidget.setTextDown('下')
-        myQCustomQWidget.setTextDown('喜爱')
+        myQCustomQWidget.setTextDown('喜爱aaaaaaaaaaaaaa')
+        myQCustomQWidget.setAccessibleName('啦啦啦啦啦啦啦啦')
+
         myQListWidgetItem = QtWidgets.QListWidgetItem(self.listTest)
+
         myQListWidgetItem.setSizeHint(myQCustomQWidget.sizeHint())
+
         self.listTest.setItemWidget(myQListWidgetItem, myQCustomQWidget)
 
         icon1 = QtGui.QIcon("F:\\Share\\2018\\rdx\\a002\\a002.jpg")
@@ -334,8 +374,10 @@ class uiTest(QtWidgets.QDialog):
         self.item2.setIcon(icon2)
         self.listTest.addItem(self.item1)
         self.listTest.addItem(self.item2)
-        print 'aaa'
         # self.listTest.addItem(self.button1)
+        self.listTest.setSortingEnabled(True)
+        self.listTest.sortItems()
+
 
     def createLayouts(self):
         mainLayout = QtWidgets.QVBoxLayout(self)
@@ -350,8 +392,6 @@ class uiTest(QtWidgets.QDialog):
         self.listTest.setGridSize(QtCore.QSize(size + buffer, size + buffer))  # 设置图标之间的间距
 
 
-a = commodityUI(RDX)
-a.show()
+# a = commodityUI(RDX)
+# a.show()
 
-# d = uiTest()
-# d.show()

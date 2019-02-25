@@ -1,8 +1,13 @@
 # coding=utf-8
 import json
 import os
+
+import logging
+
+import Qt
 from pypinyin import lazy_pinyin
 # from PIL import Image
+from maya import OpenMayaUI as omui
 
 from maya import cmds
 
@@ -58,6 +63,8 @@ def chineseSort(chinese):
     chinese.sort(key=lambda char: lazy_pinyin(char)[0][0])
 
 
+
+
 # **************************************************************
 def importMeshFile(path):
     cmds.file(path, i=True, force=True)
@@ -71,6 +78,7 @@ def newScene():
 def openMeshFile(path):
     cmds.file(path, o=True, force=True)
     cmds.viewFit()
+
 
 def fitView(f=1):
     cmds.viewFit(f=f)
