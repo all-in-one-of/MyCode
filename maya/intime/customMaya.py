@@ -1,6 +1,7 @@
 # coding=utf-8
 import json
 import os
+from pypinyin import lazy_pinyin
 # from PIL import Image
 
 from maya import cmds
@@ -52,6 +53,9 @@ def readJson(path):
         # c = eval(b)  # 转回字典
     return _info  # 返回字典
 
+
+def chineseSort(chinese):
+    chinese.sort(key=lambda char: lazy_pinyin(char)[0][0])
 
 
 # **************************************************************

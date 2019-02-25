@@ -1,6 +1,6 @@
 # coding=utf-8
 from PySide2 import QtWidgets, QtCore, QtGui
-import pymel.core as pm
+# import pymel.core as pm
 from functools import partial
 from shiboken2 import wrapInstance
 from maya import OpenMayaUI as omui
@@ -10,12 +10,13 @@ import customMaya
 
 import logging
 
-# 初始化logging系统
-logging.basicConfig()
-# 设置名称 可以针对当前工具进行记录
-logger = logging.getLogger('LightingManager')
-# 设置信息反馈的模式
-logger.setLevel(logging.DEBUG)
+# # 初始化logging系统
+# logging.basicConfig()
+# # 设置名称 可以针对当前工具进行记录
+# logger = logging.getLogger('LightingManager')
+# # 设置信息反馈的模式
+# logger.setLevel(logging.DEBUG)
+
 
 DOCKNAME = u'产品库'
 
@@ -28,7 +29,7 @@ def getDock(name=DOCKNAME):
     # 生成可以dock的Maya窗口
     # dockToMainWindow 将窗口dock进右侧的窗口栏中
     # label 设置标签名称
-    ctrl = pm.workspaceControl(name, dockToMainWindow=('right', 1), label=DOCKNAME)
+    ctrl = cmds.workspaceControl(name, dockToMainWindow=('right', 1), label=DOCKNAME)
     # 通过OpenMayaUI API 获取窗口相关的 Qt 信息
     qtCtrl = omui.MQtUtil_findControl(ctrl)
     # 将 qtCtrl 转换为Python可以识别的形式
@@ -38,9 +39,9 @@ def getDock(name=DOCKNAME):
 
 def deleteDock(name=DOCKNAME):
     # 查询窗口是否存在
-    if pm.workspaceControl(name, query=True, exists=True):
+    if cmds.workspaceControl(name, query=True, exists=True):
         # 存在即删除
-        pm.deleteUI(name)
+        cmds.deleteUI(name)
 
 
 def getMayaMainWindow():
@@ -52,11 +53,14 @@ def getMayaMainWindow():
 
 
 class commodityUI(QtWidgets.QWidget):
-    def __init__(self, info, dock=True):
-        self.intimeCommodity = info
+
+    def __init__(self, path, dock=True):
+
         # self.IntmeCommodity.findCommodity(RDX)
         # if dock:
+
         parent = getDock()
+
         # else:
         #     # 删除dock窗口
         #     deleteDock()
@@ -74,11 +78,15 @@ class commodityUI(QtWidgets.QWidget):
         #     layout = QtWidgets.QVBoxLayout(parent)
 
         # 执行父对象，并且设置parent
+
         super(commodityUI, self).__init__(parent=parent)
+
+        self.initCommodityInfo(path)
+
         self.create_widgets()
-        self.commodityTable()
-        # self.populate()
         self.buildUI()
+        self.commodityTable(self.commodityNames)
+        # self.populate()
 
         self.parent().layout().addWidget(self)
 
@@ -86,14 +94,21 @@ class commodityUI(QtWidgets.QWidget):
             parent.show()
 
     def create_widgets(self):
+
         self.searchInput = QtWidgets.QLineEdit()
+
         self.searchButton = QtWidgets.QPushButton('搜索')
-        self.searchButton.clicked.connect(self.lll)
+        self.searchButton.clicked.connect(self.searchCommodity)
 
-    def commodityTable(self):
-        self.table = QtWidgets.QTableWidget()
+        self.filtComboBox = QtWidgets.QComboBox()
+        filtType = ['名称', 'sku']
+        self.filtComboBox.addItems(filtType)
 
-        self.table.setRowCount(len(self.intimeCommodity))
+        self.filtComboBox.activated[str].connect(self.refrshCommodity)
+
+    def commodityTable(self, commodityList):
+
+        self.table.setRowCount(len(commodityList))
         self.table.verticalHeader().setDefaultSectionSize(55)
         self.table.setColumnCount(6)
         self.table.setShowGrid(False)
@@ -102,8 +117,8 @@ class commodityUI(QtWidgets.QWidget):
 
         _n = 0
 
-        for i in self.intimeCommodity:
-            commodityInfo = customMaya.readJson(i)
+        for i in commodityList:
+            commodityInfo = self.commodityInfo[i.values()[0]]
             name = commodityInfo[u'sku']
             commodityName = commodityInfo[u'商品名称']
             commodityMaker = commodityInfo[u'制作人']
@@ -126,7 +141,7 @@ class commodityUI(QtWidgets.QWidget):
             icon.setPixmap(QtGui.QPixmap(commodityPhoto).scaled(50, 50))
             self.table.setCellWidget(_n, 0, icon)
 
-            self.table.setCellWidget(_n, 1, self.buttonRow(commodityFbx,commodityBegin))
+            self.table.setCellWidget(_n, 1, self.buttonRow(commodityFbx, commodityBegin))
 
             # self.table.update
 
@@ -140,11 +155,15 @@ class commodityUI(QtWidgets.QWidget):
         # self.table.verticalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
 
     def buildUI(self):
+        self.table = QtWidgets.QTableWidget()
+
         main_Layout = QtWidgets.QVBoxLayout(self)
 
         searchWidget = QtWidgets.QWidget()
 
         searchLayout = QtWidgets.QHBoxLayout(searchWidget)
+
+        searchLayout.addWidget(self.filtComboBox)
 
         searchLayout.addWidget(self.searchInput)
 
@@ -154,50 +173,31 @@ class commodityUI(QtWidgets.QWidget):
 
         main_Layout.addWidget(self.table)
 
-    def lll(self):
-        print self.table.currentItem().text()
+    def refrshCommodity(self, filtType):
 
-    def buttonRow(self, path,commodityBegin):
-        # 列表内添加按钮
+        if filtType == u'名称':
+            self.commodityTable(self.commodityNames)
+        if filtType == 'sku':
+            self.commodityTable(self.commoditySKU)
+
+    def buttonRow(self, path, commodityBegin):
+
         widget = QtWidgets.QWidget()
-        # 修改
 
         updateBtn = QtWidgets.QPushButton('检查')
         if commodityBegin:
             updateBtn.setEnabled(False)
-        # updateBtn.setStyleSheet(''' text-align : center;
-        #                                       background-color : NavajoWhite;
-        #                                       height : 30px;
-        #                                       border-style: outset;
-        #                                       font : 13px  ''')
-
-
         updateBtn.clicked.connect(lambda: self.open_File(path))
-        # if commodityMakeBegin is False:
-        #     updateBtn.setCheckable(True)
-        # 查看
+
         viewBtn = QtWidgets.QPushButton('导入')
-        # viewBtn.setStyleSheet(''' text-align : center;
-        #                               background-color : DarkSeaGreen;
-        #                               height : 30px;
-        #                               border-style: outset;
-        #                               font : 13px; ''')
-
+        if commodityBegin:
+            viewBtn.setEnabled(False)
         viewBtn.clicked.connect(lambda: self.import_File(path))
-
-        # 删除
-        # deleteBtn = QtWidgets.QPushButton('删除')
-        # deleteBtn.setStyleSheet(''' text-align : center;
-        #                                 background-color : LightCoral;
-        #                                 height : 30px;
-        #                                 border-style: outset;
-        #                                 font : 13px; ''')
 
         hLayout = QtWidgets.QHBoxLayout()
         hLayout.addWidget(updateBtn)
         hLayout.addWidget(viewBtn)
-        # hLayout.addWidget(deleteBtn)
-        # hLayout.setContentsMargins(5, 2, 5, 2)
+
         widget.setLayout(hLayout)
         return widget
 
@@ -210,7 +210,148 @@ class commodityUI(QtWidgets.QWidget):
         # cmds.file(path,o=True,f=True)
         customMaya.openMeshFile(path)
 
+    def initCommodityInfo(self, path):
+        self.commodityInfo = {}
+        self.commodityNames = []
+        self.commoditySKU = []
+        for i in customMaya.findSpecifiedFile(path, 'json'):
+            d = {}
+            e = {}
+            commodityOriginalInfo = customMaya.readJson(i)
+            commodityOriginalSKU = customMaya.baseNameForPath(i, False)
 
-c = customMaya.findSpecifiedFile(r'F:\Share\2018\rdx', 'json')
-a = commodityUI(c)
+            self.commodityInfo[commodityOriginalSKU] = commodityOriginalInfo
+
+            d[commodityOriginalSKU] = commodityOriginalSKU
+            self.commoditySKU.append(d)
+
+            e[commodityOriginalInfo[u'商品名称']] = commodityOriginalSKU
+            self.commodityNames.append(e)
+            customMaya.chineseSort(self.commodityNames)
+
+    def searchForName(self, searchText):
+        commodityList = []
+        for i in self.commodityNames:
+            if searchText in i.keys()[0]:
+                commodityList.append(i)
+        return commodityList
+
+    def searchForSku(self, searchText):
+        commodityList = []
+        for i in self.commoditySKU:
+            if searchText in i.keys()[0]:
+                commodityList.append(i)
+        return commodityList
+
+    def searchCommodity(self):
+        searchText = self.searchInput.text()
+        if not searchText.strip():
+            cmds.warning(u'未检测到关键字')
+            return
+
+        elif self.filtComboBox.currentText() == u'名称':
+            commodityList = self.searchForName(searchText)
+            self.commodityTable(commodityList)
+        elif self.filtComboBox.currentText() == 'sku':
+            commodityList = self.searchForSku(searchText)
+            self.commodityTable(commodityList)
+        self.searchInput.clear()
+
+
+class QCustomQWidget(QtWidgets.QWidget):
+
+    def __init__(self, parent=None):
+        super(QCustomQWidget, self).__init__(parent)
+        self.textQVBoxLayout = QtWidgets.QVBoxLayout()
+        self.aaa = QtWidgets.QVBoxLayout()
+        self.bt = QtWidgets.QPushButton('王大锤')
+        self.aaa.addWidget(self.bt)
+        self.textUpQLabel = QtWidgets.QLabel()
+        self.textDownQLabel = QtWidgets.QLabel()
+        self.textQVBoxLayout.addWidget(self.textUpQLabel)
+        self.textQVBoxLayout.addWidget(self.textDownQLabel)
+        self.allQHBoxLayout = QtWidgets.QHBoxLayout()
+        self.iconQLabel = QtWidgets.QPushButton()
+        self.allQHBoxLayout.addWidget(self.iconQLabel, 0)
+        self.allQHBoxLayout.addLayout(self.textQVBoxLayout, 1)
+        self.allQHBoxLayout.addLayout(self.aaa)
+        self.setLayout(self.allQHBoxLayout)
+        # setStyleSheet
+        # self.textUpQLabel.setStyleSheet('''
+        #     color: rgb(0, 0, 255);
+        # ''')
+        # self.textDownQLabel.setStyleSheet('''
+        #     color: rgb(255, 0, 0);
+        # ''')
+
+    def setTextUp(self, text):
+        self.textUpQLabel.setText(text)
+
+    def setTextDown(self, text):
+        self.textDownQLabel.setText(text)
+
+    def setIcon(self, imagePath):
+        # pass
+        self.iconQLabel.setIconSize(QtCore.QSize(50, 50))
+        self.iconQLabel.setIcon(QtGui.QPixmap(imagePath))
+        self.iconQLabel.setFixedSize(52, 52)
+
+        self.iconQLabel.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+
+
+class uiTest(QtWidgets.QDialog):
+
+    def __init__(self, parent=getMayaMainWindow()):
+        super(uiTest, self).__init__(parent)
+
+        self.createWidgets()
+        self.createLayouts()
+
+    def createWidgets(self):
+        size = 50
+        self.button1 = QtWidgets.QPushButton('lllaaaa')
+        self.button1.clicked.connect(self.listfix)
+
+        self.listTest = QtWidgets.QListWidget()
+        self.listTest.setIconSize(QtCore.QSize(size, size))  # 设置图标大小
+
+        # self.listTest.addItem('aaa')
+        self.item1 = QtWidgets.QListWidgetItem('bbbbb')
+        self.item2 = QtWidgets.QListWidgetItem('aaaaa')
+
+        myQCustomQWidget = QCustomQWidget()
+        myQCustomQWidget.setIcon("F:\\Share\\2018\\rdx\\a003\\a003.jpg")
+        myQCustomQWidget.setTextUp('上')
+        myQCustomQWidget.setTextDown('下')
+        myQCustomQWidget.setTextDown('喜爱')
+        myQListWidgetItem = QtWidgets.QListWidgetItem(self.listTest)
+        myQListWidgetItem.setSizeHint(myQCustomQWidget.sizeHint())
+        self.listTest.setItemWidget(myQListWidgetItem, myQCustomQWidget)
+
+        icon1 = QtGui.QIcon("F:\\Share\\2018\\rdx\\a002\\a002.jpg")
+        icon2 = QtGui.QIcon("F:\\Share\\2018\\rdx\\a001\\a001.jpg")
+        self.item1.setIcon(icon1)
+        self.item2.setIcon(icon2)
+        self.listTest.addItem(self.item1)
+        self.listTest.addItem(self.item2)
+        print 'aaa'
+        # self.listTest.addItem(self.button1)
+
+    def createLayouts(self):
+        mainLayout = QtWidgets.QVBoxLayout(self)
+        mainLayout.addWidget(self.button1)
+        mainLayout.addWidget(self.listTest)
+
+    def listfix(self):
+        size = 50
+        buffer = 12
+        self.listTest.setViewMode(QtWidgets.QListWidget.IconMode)  # 开启图标模式
+        self.listTest.setResizeMode(QtWidgets.QListWidget.Adjust)  # 设置调整窗口的时候自动换行
+        self.listTest.setGridSize(QtCore.QSize(size + buffer, size + buffer))  # 设置图标之间的间距
+
+
+a = commodityUI(RDX)
 a.show()
+
+# d = uiTest()
+# d.show()
