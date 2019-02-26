@@ -1,4 +1,8 @@
 # coding=utf-8
+import os
+import sys
+from functools import partial
+
 from PySide2 import QtWidgets, QtCore, QtGui
 import pymel.core as pm
 from maya import OpenMayaUI as omui
@@ -42,6 +46,23 @@ DOCKNAME = u'产品库'
 
 RDX = r'F:\Share\2018\rdx'
 
+ImageLose = r'C:\Users\Intime\Documents\MyCode\maya\intime\imageLose.jpg'
+
+MakeState = {
+    0: '未制作',
+    1: '制作中···',
+    2: '待审核···',
+    3: '等待提交',
+    4: '制作完成'
+}
+ColorLevel = {
+    0: (255, 0, 0),  # 红色
+    1: (255, 120, 0),
+    2: (255, 255, 0),
+    3: (64, 150, 80),
+    4: (0, 255, 0)
+}
+
 
 def getDock(name=DOCKNAME):
     # 首先删除重名的窗口
@@ -57,13 +78,11 @@ def getDock(name=DOCKNAME):
     return ptr
 
 
-
 def deleteDock(name=DOCKNAME):
     # 查询窗口是否存在
     if pm.workspaceControl(name, query=True, exists=True):
         # 存在即删除
         pm.deleteUI(name)
-
 
 
 class commodityUI(QtWidgets.QWidget):
@@ -225,6 +244,7 @@ class commodityUI(QtWidgets.QWidget):
         customMaya.openMeshFile(path)
 
     def initCommodityInfo(self, path):
+        print os.getcwd()
         self.commodityInfo = {}
         self.commodityNames = []
         self.commoditySKU = []
@@ -276,19 +296,50 @@ class QCustomQWidget(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
         super(QCustomQWidget, self).__init__(parent)
-        self.textQVBoxLayout = QtWidgets.QVBoxLayout()
-        self.aaa = QtWidgets.QVBoxLayout()
-        self.bt = QtWidgets.QPushButton('王大锤')
-        self.aaa.addWidget(self.bt)
-        self.textUpQLabel = QtWidgets.QLabel()
-        self.textDownQLabel = QtWidgets.QLabel()
-        self.textQVBoxLayout.addWidget(self.textUpQLabel)
-        self.textQVBoxLayout.addWidget(self.textDownQLabel)
+
+        # 名字
+        self.nameText = QtWidgets.QLabel()
+        # sku
+        self.skuText = QtWidgets.QLabel()
+        # 制作人
+        self.makerText = QtWidgets.QLabel()
+        # 审核人
+        self.inspectorText = QtWidgets.QLabel()
+        # 对接人
+        self.projectAcceptanceText = QtWidgets.QLabel()
+        # 制作状态
+        self.makeStateText = QtWidgets.QLabel()
+
+        # 按钮layout
+        self.buttonLayout = QtWidgets.QVBoxLayout()
+        self.openBtn = QtWidgets.QPushButton('打开')
+        self.importBtn = QtWidgets.QPushButton('导入')
+        self.buttonLayout.addWidget(self.openBtn)
+        self.buttonLayout.addWidget(self.importBtn)
+
+        # 文本左layout
+        self.textQVBoxLayoutLeft = QtWidgets.QVBoxLayout()
+        self.textQVBoxLayoutLeft.addWidget(self.nameText)
+        self.textQVBoxLayoutLeft.addWidget(self.skuText)
+        self.textQVBoxLayoutLeft.addWidget(self.makeStateText)
+
+        # 文本右layout
+        self.textQVBoxLayoutRight = QtWidgets.QVBoxLayout()
+        self.textQVBoxLayoutRight.addWidget(self.makerText)
+        self.textQVBoxLayoutRight.addWidget(self.projectAcceptanceText)
+        self.textQVBoxLayoutRight.addWidget(self.inspectorText)
+
+        # 图片layout
+        self.iconBtn = QtWidgets.QPushButton()
+
+        # 主 layout
         self.allQHBoxLayout = QtWidgets.QHBoxLayout()
-        self.iconQLabel = QtWidgets.QPushButton()
-        self.allQHBoxLayout.addWidget(self.iconQLabel)
-        self.allQHBoxLayout.addLayout(self.textQVBoxLayout, 1)
-        self.allQHBoxLayout.addLayout(self.aaa)
+
+        self.allQHBoxLayout.addWidget(self.iconBtn, 0)
+        self.allQHBoxLayout.addLayout(self.textQVBoxLayoutLeft, 1)
+        self.allQHBoxLayout.addLayout(self.textQVBoxLayoutRight, 1)
+        # self.allQHBoxLayout.addWidget(self.buttonRow())
+        self.allQHBoxLayout.addLayout(self.buttonLayout)
         self.setLayout(self.allQHBoxLayout)
         # setStyleSheet
         # self.textUpQLabel.setStyleSheet('''
@@ -298,23 +349,25 @@ class QCustomQWidget(QtWidgets.QWidget):
         #     color: rgb(255, 0, 0);
         # ''')
 
-    def setTextUp(self, text):
-        self.textUpQLabel.setText(text)
-
-    def setTextDown(self, text):
-        self.textDownQLabel.setText(text)
-
     def setIcon(self, imagePath):
-        # pass
-        self.iconQLabel.setIconSize(QtCore.QSize(50, 50))
-        self.iconQLabel.setIcon(QtGui.QPixmap(imagePath))
-        # self.iconQLabel.setFixedSize(52, 52)
-        self.iconQLabel.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        if os.path.exists(imagePath):
+            self.iconBtn.setIcon(QtGui.QPixmap(imagePath))
+        else:
+            self.iconBtn.setIcon(QtGui.QPixmap(ImageLose))
+
+        self.iconBtn.setIconSize(QtCore.QSize(50, 50))
+        self.iconBtn.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+
+    def setMakeState(self, info):
+        self.makeStateText.setText(MakeState[info])
+        self.makeStateText.setStyleSheet('color:rgb(%s,%s,%s)' % ColorLevel[info])
+
+    # def set
 
 
-class uiTest(QtWidgets.QWidget):
+class commodityLibraryUI(QtWidgets.QWidget):
 
-    def __init__(self,dock=True):
+    def __init__(self, dock=True):
         if dock:
             parent = getDock(DOCKNAME)
         else:
@@ -337,61 +390,85 @@ class uiTest(QtWidgets.QWidget):
         if not dock:
             parent.show()
 
-        super(uiTest, self).__init__(parent=parent)
+        super(commodityLibraryUI, self).__init__(parent=parent)
 
         self.createWidgets()
         self.createLayouts()
+        self.initCommodityInfo(r'C:\Users\Intime\Documents\MyCode\maya\intime')
+        self.refreshCommodityList()
 
         self.parent().layout().addWidget(self)
+
     def createWidgets(self):
-        size = 50
-        self.button1 = QtWidgets.QPushButton('lllaaaa')
-        self.button1.clicked.connect(self.listfix)
 
-        self.listTest = QtWidgets.QListWidget()
-        self.listTest.setIconSize(QtCore.QSize(size, size))  # 设置图标大小
-
-        # self.listTest.addItem('aaa')
-        self.item1 = QtWidgets.QListWidgetItem('巴巴爸爸')
-        self.item2 = QtWidgets.QListWidgetItem('啊啊啊')
-
-        myQCustomQWidget = QCustomQWidget()
-        myQCustomQWidget.setIcon("F:\\Share\\2018\\rdx\\a003\\a003.jpg")
-        myQCustomQWidget.setTextUp('上')
-        myQCustomQWidget.setTextDown('下')
-        myQCustomQWidget.setTextDown('喜爱aaaaaaaaaaaaaa')
-        myQCustomQWidget.setAccessibleName('啦啦啦啦啦啦啦啦')
-
-        myQListWidgetItem = QtWidgets.QListWidgetItem(self.listTest)
-
-        myQListWidgetItem.setSizeHint(myQCustomQWidget.sizeHint())
-
-        self.listTest.setItemWidget(myQListWidgetItem, myQCustomQWidget)
-
-        icon1 = QtGui.QIcon("F:\\Share\\2018\\rdx\\a002\\a002.jpg")
-        icon2 = QtGui.QIcon("F:\\Share\\2018\\rdx\\a001\\a001.jpg")
-        self.item1.setIcon(icon1)
-        self.item2.setIcon(icon2)
-        self.listTest.addItem(self.item1)
-        self.listTest.addItem(self.item2)
-        # self.listTest.addItem(self.button1)
-        self.listTest.setSortingEnabled(True)
-        self.listTest.sortItems()
-
+        self.commodityList = QtWidgets.QListWidget()
 
     def createLayouts(self):
         mainLayout = QtWidgets.QVBoxLayout(self)
-        mainLayout.addWidget(self.button1)
-        mainLayout.addWidget(self.listTest)
+        mainLayout.addWidget(self.commodityList)
 
-    def listfix(self):
-        size = 50
-        buffer = 12
-        self.listTest.setViewMode(QtWidgets.QListWidget.IconMode)  # 开启图标模式
-        self.listTest.setResizeMode(QtWidgets.QListWidget.Adjust)  # 设置调整窗口的时候自动换行
-        self.listTest.setGridSize(QtCore.QSize(size + buffer, size + buffer))  # 设置图标之间的间距
+    def refreshCommodityList(self):
 
+        for i in self.commodityNames:
+            sku = i.values()[0]
+            self.readCommodity(sku)
 
-# a = commodityUI(RDX)
-# a.show()
+    def initCommodityInfo(self, path):
+        self.commodityInfo = {}
+        self.commodityNames = []
+        self.commoditySKU = []
+        for i in customMaya.findSpecifiedFile(path, 'json'):
+            d = {}
+            e = {}
+            commodityOriginalInfo = customMaya.readJson(i)
+            commodityOriginalSKU = customMaya.baseNameForPath(i, False)
 
+            self.commodityInfo[commodityOriginalSKU] = commodityOriginalInfo
+
+            d[commodityOriginalSKU] = commodityOriginalSKU
+            self.commoditySKU.append(d)
+
+            e[commodityOriginalInfo[u'商品名称']] = commodityOriginalSKU
+            self.commodityNames.append(e)
+            customMaya.chineseSort(self.commodityNames)
+
+    def readCommodity(self, sku):
+
+        commodityInfo = self.commodityInfo[sku]
+
+        # 自定义组件
+        myQCustomQWidget = QCustomQWidget()
+
+        # 创建列表组件
+        myQListWidgetItem = QtWidgets.QListWidgetItem(self.commodityList)
+
+        commodityPhoto = commodityInfo[u'商品图片地址']
+        myQCustomQWidget.setIcon(commodityPhoto)
+        myQCustomQWidget.iconBtn.clicked.connect(lambda: self.openExplorer(os.path.dirname(commodityPhoto)))
+
+        myQCustomQWidget.nameText.setText('名称：%s' % commodityInfo[u'商品名称'].encode('utf-8'))
+        myQCustomQWidget.skuText.setText('sku：%s' % commodityInfo[u'sku'].encode('utf-8'))
+        myQCustomQWidget.makerText.setText('制作人：%s' % commodityInfo[u'制作人'].encode('utf-8'))
+        myQCustomQWidget.setMakeState(commodityInfo[u'制作状态'])
+        myQCustomQWidget.inspectorText.setText('审核人：%s' % commodityInfo[u'审核人'].encode('utf-8'))
+        myQCustomQWidget.projectAcceptanceText.setText('对接人：%s' % commodityInfo[u'对接人'].encode('utf-8'))
+
+        # 按钮
+        commodityFbx = commodityInfo[u'规格'][u'finally'][u'模型'][u'收藏级'][u'fbx文件地址']
+        myQCustomQWidget.openBtn.clicked.connect(lambda: self.openFile(commodityFbx))
+        myQCustomQWidget.importBtn.clicked.connect(lambda: self.importFile(commodityFbx))
+
+        # 设置列表组件大小为自定义组件的大小
+        myQListWidgetItem.setSizeHint(myQCustomQWidget.sizeHint())
+
+        # 添加自定义组件到列表组件
+        self.commodityList.setItemWidget(myQListWidgetItem, myQCustomQWidget)
+
+    def importFile(self, path):
+        customMaya.importMeshFile(path)
+
+    def openFile(self, path):
+        customMaya.openMeshFile(path)
+
+    def openExplorer(self, path):
+        os.system("explorer.exe %s" % path)

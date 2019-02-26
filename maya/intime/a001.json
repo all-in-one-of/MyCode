@@ -1,0 +1,104 @@
+{
+  "sku": "a001",
+  "商品名称": "参文椅",
+  "副标题": "",
+  "价格": 0,
+  "所属商家": "荣鼎轩红木",
+  "所属品牌": "荣鼎轩",
+  "所属分类": "客厅",
+  "所属系列": "",
+  "商品图片地址": "F:\\Share\\2018\\rdx\\a001\\a001a.jpg",
+  "所属套装": "",
+  "商品长宽高": "",
+  "3dMax地址": "",
+  "是否有金属配件": "",
+  "是否有发光配件": "",
+  "备注": "",
+  "制作类型": "普通类型",
+  "对接人": "王",
+  "制作人": "何",
+  "审核人": "韩",
+  "录入时间": "",
+  "开始制作时间": "",
+  "参考图地址": "",
+  "obj文件地址": "",
+  "规格": {
+    "finally": {
+      "提交时间": "",
+      "note": "",
+      "材质包地址": "F:\\Share\\2018\\rdx\\a001\\ma001",
+      "MD5码": "cc9f42194ca4a2bfe7da8df972c51493",
+      "模型": {
+        "收藏级": {
+          "maya文件地址": "",
+          "fbx文件地址": "F:\\Share\\2018\\rdx\\a001\\a001.fbx",
+          "价格": 0,
+          "sku": "a001",
+          "渲染图片地址": "F:\\Share\\2018\\rdx\\a001\\a001.jpg",
+          "贴图地址": {
+            "baseColor": "F:\\Share\\2018\\rdx\\a001\\SimplygonMaterial_1_Diffuse.png",
+            "normals": "F:\\Share\\2018\\rdx\\a001\\SimplygonMaterial_1_Normals.png",
+            "ambientOcclusion": "F:\\Share\\2018\\rdx\\a001\\SimplygonMaterial_1_AmbientOcclusion.png",
+            "shadow": "F:\\Share\\2018\\rdx\\a001\\a001_s.png",
+            "metallic": "",
+            "roughness": "",
+            "emissive": ""
+          },
+          "模型包地址": "F:\\Share\\2018\\rdx\\a001\\a001"
+        },
+        "优等级": {
+          "maya文件地址": "",
+          "fbx文件地址": "F:\\Share\\2018\\rdx\\a001\\a001.fbx",
+          "价格": 0,
+          "sku": "a0011",
+          "渲染图片地址": "F:\\Share\\2018\\rdx\\a001\\a001.jpg",
+          "贴图地址": {
+            "baseColor": "F:\\Share\\2018\\rdx\\a001\\SimplygonMaterial_1_Diffuse.png",
+            "normals": "F:\\Share\\2018\\rdx\\a001\\SimplygonMaterial_1_Normals.png",
+            "ambientOcclusion": "F:\\Share\\2018\\rdx\\a001\\SimplygonMaterial_1_AmbientOcclusion.png",
+            "shadow": "F:\\Share\\2018\\rdx\\a001\\a001_s.png",
+            "metallic": "",
+            "roughness": "",
+            "emissive": ""
+          },
+          "模型包地址": "F:\\Share\\2018\\rdx\\a001\\a0011"
+        },
+        "实用级": {
+          "maya文件地址": "",
+          "fbx文件地址": "F:\\Share\\2018\\rdx\\a001\\a001.fbx",
+          "价格": 0,
+          "sku": "a0012",
+          "渲染图片地址": "F:\\Share\\2018\\rdx\\a001\\a001.jpg",
+          "贴图地址": {
+            "baseColor": "F:\\Share\\2018\\rdx\\a001\\SimplygonMaterial_1_Diffuse.png",
+            "normals": "F:\\Share\\2018\\rdx\\a001\\SimplygonMaterial_1_Normals.png",
+            "ambientOcclusion": "F:\\Share\\2018\\rdx\\a001\\SimplygonMaterial_1_AmbientOcclusion.png",
+            "shadow": "F:\\Share\\2018\\rdx\\a001\\a001_s.png",
+            "metallic": "",
+            "roughness": "",
+            "emissive": ""
+          },
+          "模型包地址": "F:\\Share\\2018\\rdx\\a001\\a0012"
+        },
+        "一等级": {
+          "maya文件地址": "",
+          "fbx文件地址": "F:\\Share\\2018\\rdx\\a001\\a001.fbx",
+          "价格": 0,
+          "sku": "a0013",
+          "渲染图片地址": "F:\\Share\\2018\\rdx\\a001\\a001.jpg",
+          "贴图地址": {
+            "baseColor": "F:\\Share\\2018\\rdx\\a001\\SimplygonMaterial_1_Diffuse.png",
+            "normals": "F:\\Share\\2018\\rdx\\a001\\SimplygonMaterial_1_Normals.png",
+            "ambientOcclusion": "F:\\Share\\2018\\rdx\\a001\\SimplygonMaterial_1_AmbientOcclusion.png",
+            "shadow": "F:\\Share\\2018\\rdx\\a001\\a001_s.png",
+            "metallic": "",
+            "roughness": "",
+            "emissive": ""
+          },
+          "模型包地址": "F:\\Share\\2018\\rdx\\a001\\a0013"
+        }
+      }
+    }
+  },
+  "制作状态": 4
+}
