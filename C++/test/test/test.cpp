@@ -3,14 +3,19 @@
 
 #include "pch.h"
 #include <iostream>
+#include <cmath>
 using namespace std;
 
 int main()
 {
-	int a ,b;
-	a = 10;
-	b = a + 1;
-    cout << a+b <<endl; 
+
+	const float PI = 3.14f; // 定义一个float类型的常量
+
+	float radius = 4.5f;
+	float height = 90.0f;
+	double volume = PI * pow(radius , 2)*height;
+	
+	cout << "体积是：" << volume << endl;
 }
 
 // 运行程序: Ctrl + F5 或调试 >“开始执行(不调试)”菜单

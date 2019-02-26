@@ -4,7 +4,6 @@ import json
 import locale
 import os
 
-
 s = {
     "s01": "桑扈·桌",
     "s02": "须臾·茶桌",
