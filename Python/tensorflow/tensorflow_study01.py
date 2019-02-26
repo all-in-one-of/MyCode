@@ -44,17 +44,61 @@ import tensorflow as tf
 
 ######################################################################
 
-state = tf.Variable(0, name='counter')
+# state = tf.Variable(0, name='counter')
+#
+# one = tf.constant(1)
+#
+# new_value = tf.add(state, one)
+# update = tf.assign(state, new_value)
+#
+# init = tf.initialize_all_variables()
+#
+# with tf.Session() as sess:
+#     sess.run(init)
+#     for i in range(3):
+#         sess.run(update)
+#         print(sess.run(state))
 
-one = tf.constant(1)
+import os
+import time
 
-new_value = tf.add(state, one)
-update = tf.assign(state, new_value)
 
-init = tf.initialize_all_variables()
+def findSpecifiedFile(path, suffix=''):
+    '''
+    查找指定文件
+    :param path: 根目录
+    :param suffix: 格式，默认是空
+    :return: 文件地址列表
+    '''
+    _file = []
+    for root, dirs, fils in os.walk(path):
+        for file in fils:
+            if file.endswith(suffix):
+                _file.append(os.path.join(root, file))
+    return _file
 
-with tf.Session() as sess:
-    sess.run(init)
-    for i in range(3):
-        sess.run(update)
-        print(sess.run(state))
+
+from imageai.Detection import ObjectDetection
+
+execution_path = os.getcwd()
+
+detector = ObjectDetection()
+
+detector.setModelTypeAsYOLOv3()
+
+detector.setModelPath(r"C:\Users\HYC\Desktop\yolo.h5")
+
+detector.loadModel()
+a = time.time()
+
+for i in findSpecifiedFile(r'C:\Users\HYC\Downloads\aaa\红木家具_百度图片搜索','jpg'):
+
+    detections = detector.detectCustomObjectsFromImage(
+    input_image=i,
+    output_image_path=os.path.join(r'C:\Users\HYC\Desktop\aaa',os.path.basename(i)))
+    print(os.path.basename(i))
+    # for eachObject in detections:
+    #     print(eachObject["name"], " : ", eachObject["percentage_probability"],
+    #           " : ", eachObject["box_points"])
+
+print(time.time() - a)
