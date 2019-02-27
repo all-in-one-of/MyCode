@@ -6,8 +6,7 @@ import logging
 
 import Qt
 from pypinyin import lazy_pinyin
-# from PIL import Image
-from maya import OpenMayaUI as omui
+from PIL import Image
 
 from maya import cmds
 
@@ -62,8 +61,19 @@ def readJson(path):
 def chineseSort(chinese):
     chinese.sort(key=lambda char: lazy_pinyin(char)[0][0])
 
+def createDirectory(directory):
+    '''
+    创建路径，如果文件夹不存在，就创建
+    :param directory (str): 创建文件夹
+    :return:
+    '''
+    if not os.path.exists(directory):
+        os.mkdir(directory)
 
-
+def imageSaveAs(oPath,tPath,size):
+    im=Image.open(oPath)
+    im = im.resize(size,Image.ANTIALIAS)
+    im.save(tPath)
 
 # **************************************************************
 def importMeshFile(path):
@@ -170,3 +180,5 @@ def fitView(f=1):
 #
 #     # cmds.setAttr(ao + '.fileTextureName', i[0], type='string')
 #     cmds.sets(meshName, e=True, fe=shading_group)
+
+

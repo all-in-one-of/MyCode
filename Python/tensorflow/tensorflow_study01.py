@@ -86,19 +86,19 @@ detector = ObjectDetection()
 
 detector.setModelTypeAsYOLOv3()
 
-detector.setModelPath(r"C:\Users\HYC\Desktop\yolo.h5")
+detector.setModelPath(r"F:\yolo.h5")
 
 detector.loadModel()
 a = time.time()
 
-for i in findSpecifiedFile(r'C:\Users\HYC\Downloads\aaa\红木家具_百度图片搜索','jpg'):
+for i in findSpecifiedFile(r'F:\Share\2018','jpg'):
 
     detections = detector.detectCustomObjectsFromImage(
     input_image=i,
-    output_image_path=os.path.join(r'C:\Users\HYC\Desktop\aaa',os.path.basename(i)))
-    print(os.path.basename(i))
-    # for eachObject in detections:
-    #     print(eachObject["name"], " : ", eachObject["percentage_probability"],
-    #           " : ", eachObject["box_points"])
+    output_image_path=os.path.join(r'C:\Users\Intime\Desktop\ssss',os.path.basename(i)))
+    # print(os.path.basename(i))
+    for eachObject in detections:
+        print(eachObject["name"], " : ", eachObject["percentage_probability"],
+              " : ", eachObject["box_points"])
 
 print(time.time() - a)

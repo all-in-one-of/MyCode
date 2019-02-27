@@ -2,16 +2,19 @@
 import os
 import sys
 from functools import partial
-
+import re
 from PySide2 import QtWidgets, QtCore, QtGui
 import pymel.core as pm
 from maya import OpenMayaUI as omui
 from maya import cmds
+from PIL import Image
 import customMaya
 
 import logging
 import Qt
 
+TempPath = os.path.join(os.environ['TEMP'], 'inTimeLibrary')
+customMaya.createDirectory(TempPath)
 # 初始化logging系统
 logging.basicConfig()
 # 设置名称 可以针对当前工具进行记录
@@ -31,16 +34,6 @@ else:
     logger.debug('Using PySide2 with shiboken2')
     from shiboken2 import wrapInstance
     from Qt.QtCore import Signal
-
-
-# 获取Maya的主窗口 用于 dock 窗口
-def getMayaMainWindow():
-    # 通过OpenMayaUI API 获取Maya主窗口
-    win = omui.MQtUtil_mainWindow()
-    # 将窗口转换成Python可以识别的东西 这里是将它转换为QMainWindow
-    ptr = wrapInstance(long(win), QtWidgets.QMainWindow)
-    return ptr
-
 
 DOCKNAME = u'产品库'
 
@@ -62,6 +55,27 @@ ColorLevel = {
     3: (64, 150, 80),
     4: (0, 255, 0)
 }
+FlitType = [
+    '名称',
+    'sku',
+    '制作人',
+    '',
+    '',
+    '',
+]
+Makers = [
+    u'韩开旺',
+    u'何思民'
+]
+
+
+# 获取Maya的主窗口 用于 dock 窗口
+def getMayaMainWindow():
+    # 通过OpenMayaUI API 获取Maya主窗口
+    win = omui.MQtUtil_mainWindow()
+    # 将窗口转换成Python可以识别的东西 这里是将它转换为QMainWindow
+    ptr = wrapInstance(long(win), QtWidgets.QMainWindow)
+    return ptr
 
 
 def getDock(name=DOCKNAME):
@@ -338,22 +352,16 @@ class QCustomQWidget(QtWidgets.QWidget):
         self.allQHBoxLayout.addWidget(self.iconBtn, 0)
         self.allQHBoxLayout.addLayout(self.textQVBoxLayoutLeft, 1)
         self.allQHBoxLayout.addLayout(self.textQVBoxLayoutRight, 1)
-        # self.allQHBoxLayout.addWidget(self.buttonRow())
         self.allQHBoxLayout.addLayout(self.buttonLayout)
+
         self.setLayout(self.allQHBoxLayout)
-        # setStyleSheet
-        # self.textUpQLabel.setStyleSheet('''
-        #     color: rgb(0, 0, 255);
-        # ''')
-        # self.textDownQLabel.setStyleSheet('''
-        #     color: rgb(255, 0, 0);
-        # ''')
 
     def setIcon(self, imagePath):
-        if os.path.exists(imagePath):
-            self.iconBtn.setIcon(QtGui.QPixmap(imagePath))
-        else:
-            self.iconBtn.setIcon(QtGui.QPixmap(ImageLose))
+        # if os.path.exists(imagePath):
+        #     self.iconBtn.setIcon(QtGui.QPixmap(imagePath))
+        # else:
+        #     self.iconBtn.setIcon(QtGui.QPixmap(ImageLose))
+        self.iconBtn.setIcon(QtGui.QPixmap(imagePath))
 
         self.iconBtn.setIconSize(QtCore.QSize(50, 50))
         self.iconBtn.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
@@ -362,7 +370,8 @@ class QCustomQWidget(QtWidgets.QWidget):
         self.makeStateText.setText(MakeState[info])
         self.makeStateText.setStyleSheet('color:rgb(%s,%s,%s)' % ColorLevel[info])
 
-    # def set
+    def setNameText(self, text):
+        self.nameText.setText(text)
 
 
 class commodityLibraryUI(QtWidgets.QWidget):
@@ -391,35 +400,80 @@ class commodityLibraryUI(QtWidgets.QWidget):
             parent.show()
 
         super(commodityLibraryUI, self).__init__(parent=parent)
+        self.commodityList = []
 
+        self.setMinimumWidth(370)
         self.createWidgets()
         self.createLayouts()
-        self.initCommodityInfo(r'C:\Users\Intime\Documents\MyCode\maya\intime')
-        self.refreshCommodityList()
+        self.initCommodityInfo()
+        self.flitCommodity(self.radioBtn0)
 
         self.parent().layout().addWidget(self)
 
     def createWidgets(self):
-
+        # 列表框
         self.commodityList = QtWidgets.QListWidget()
+
+        # 搜索框
+        self.searchInput = QtWidgets.QLineEdit()
+        self.searchBtn = QtWidgets.QPushButton('搜索')
+        self.searchBtn.clicked.connect(self.searchCommodity)
+
+        self.searchLayout = QtWidgets.QHBoxLayout()
+        self.searchLayout.addWidget(self.searchInput)
+        self.searchLayout.addWidget(self.searchBtn)
+
+        # 分类框
+
+        self.commodityNmuber = QtWidgets.QLabel()
+
+        self.radioBtn0 = QtWidgets.QRadioButton('名称')
+        self.radioBtn1 = QtWidgets.QRadioButton('sku')
+        self.radioBtn2 = QtWidgets.QRadioButton('完成度')
+        self.radioBtn3 = QtWidgets.QRadioButton('制作人')
+
+        self.radioBtn0.clicked.connect(lambda: self.flitCommodity(self.radioBtn0))
+        self.radioBtn1.clicked.connect(lambda: self.flitCommodity(self.radioBtn1))
+        self.radioBtn2.clicked.connect(lambda: self.flitCommodity(self.radioBtn2))
+        self.radioBtn3.clicked.connect(lambda: self.flitCommodity(self.radioBtn3))
+
+        self.radioBtn0.setChecked(True)
+
+        self.radioLayout = QtWidgets.QHBoxLayout()
+        self.radioLayout.addWidget(self.commodityNmuber)
+        self.radioLayout.addWidget(self.radioBtn0)
+        self.radioLayout.addWidget(self.radioBtn1)
+        self.radioLayout.addWidget(self.radioBtn2)
+        self.radioLayout.addWidget(self.radioBtn3)
+
+        ######
 
     def createLayouts(self):
         mainLayout = QtWidgets.QVBoxLayout(self)
+
+        mainLayout.addLayout(self.searchLayout)
+        mainLayout.addLayout(self.radioLayout)
         mainLayout.addWidget(self.commodityList)
 
-    def refreshCommodityList(self):
-
-        for i in self.commodityNames:
+    def refreshCommodityList(self, commodityList):
+        self.setCommodityNumber(len(commodityList))
+        self.commodityList.clear()
+        for i in commodityList:
             sku = i.values()[0]
             self.readCommodity(sku)
 
-    def initCommodityInfo(self, path):
+    def initCommodityInfo(self, path=RDX):
         self.commodityInfo = {}
         self.commodityNames = []
         self.commoditySKU = []
+        self.commodityMaker = []
+        self.commodityMakeState = []
+        self.commodityIcon = {}
         for i in customMaya.findSpecifiedFile(path, 'json'):
             d = {}
             e = {}
+            f = {}
+            g = {}
             commodityOriginalInfo = customMaya.readJson(i)
             commodityOriginalSKU = customMaya.baseNameForPath(i, False)
 
@@ -432,37 +486,78 @@ class commodityLibraryUI(QtWidgets.QWidget):
             self.commodityNames.append(e)
             customMaya.chineseSort(self.commodityNames)
 
+            f[commodityOriginalInfo[u'制作人']] = commodityOriginalSKU
+            self.commodityMaker.append(f)
+            customMaya.chineseSort(self.commodityMaker)
+
+            g[commodityOriginalInfo[u'制作状态']] = commodityOriginalSKU
+            self.commodityMakeState.append(g)
+            self.commodityMakeState.sort()
+            self.commodityMakeState.reverse()
+
+            originalCommodityImage = commodityOriginalInfo[u'商品图片地址']
+
+            cacheImage = os.path.join(TempPath, os.path.basename(originalCommodityImage))
+            imageSize = (64,64)
+            if os.path.exists(originalCommodityImage) is False:
+                try:
+                    customMaya.imageSaveAs(originalCommodityImage,
+                                           cacheImage,
+                                           imageSize)
+                    self.commodityIcon[commodityOriginalSKU] = cacheImage
+                except:
+                    customMaya.imageSaveAs(ImageLose,
+                                           cacheImage,
+                                           imageSize)
+                    self.commodityIcon[commodityOriginalSKU] = cacheImage
+
+            else:
+                try:
+                    customMaya.imageSaveAs(originalCommodityImage,
+                                           cacheImage,
+                                           imageSize)
+                    self.commodityIcon[commodityOriginalSKU] = cacheImage
+                except:
+                    customMaya.imageSaveAs(ImageLose,
+                                           cacheImage,
+                                           (50, 50))
+                    self.commodityIcon[commodityOriginalSKU] = cacheImage
+
+            # break
+
     def readCommodity(self, sku):
+        # 自定义组件
+        self.myQCustomQWidget = QCustomQWidget()
 
         commodityInfo = self.commodityInfo[sku]
-
-        # 自定义组件
-        myQCustomQWidget = QCustomQWidget()
 
         # 创建列表组件
         myQListWidgetItem = QtWidgets.QListWidgetItem(self.commodityList)
 
-        commodityPhoto = commodityInfo[u'商品图片地址']
-        myQCustomQWidget.setIcon(commodityPhoto)
-        myQCustomQWidget.iconBtn.clicked.connect(lambda: self.openExplorer(os.path.dirname(commodityPhoto)))
+        commodityPhoto = self.commodityIcon[sku]
+        self.myQCustomQWidget.setIcon(commodityPhoto)
+        self.myQCustomQWidget.iconBtn.clicked.connect(lambda: self.openExplorer(os.path.dirname(commodityPhoto)))
 
-        myQCustomQWidget.nameText.setText('名称：%s' % commodityInfo[u'商品名称'].encode('utf-8'))
-        myQCustomQWidget.skuText.setText('sku：%s' % commodityInfo[u'sku'].encode('utf-8'))
-        myQCustomQWidget.makerText.setText('制作人：%s' % commodityInfo[u'制作人'].encode('utf-8'))
-        myQCustomQWidget.setMakeState(commodityInfo[u'制作状态'])
-        myQCustomQWidget.inspectorText.setText('审核人：%s' % commodityInfo[u'审核人'].encode('utf-8'))
-        myQCustomQWidget.projectAcceptanceText.setText('对接人：%s' % commodityInfo[u'对接人'].encode('utf-8'))
+        commodityName = commodityInfo[u'商品名称']
+        self.setNameText(self.width(), commodityName)
+        # self.myQCustomQWidget.nameText.setText('名称：%s' % commodityName.encode('utf-8'))
+
+        self.myQCustomQWidget.skuText.setText('sku：%s' % commodityInfo[u'sku'].encode('utf-8'))
+        self.myQCustomQWidget.makerText.setText('制作人：%s' % commodityInfo[u'制作人'].encode('utf-8'))
+        self.myQCustomQWidget.setMakeState(commodityInfo[u'制作状态'])
+        self.myQCustomQWidget.inspectorText.setText('审核人：%s' % commodityInfo[u'审核人'].encode('utf-8'))
+        self.myQCustomQWidget.projectAcceptanceText.setText('对接人：%s' % commodityInfo[u'对接人'].encode('utf-8'))
 
         # 按钮
         commodityFbx = commodityInfo[u'规格'][u'finally'][u'模型'][u'收藏级'][u'fbx文件地址']
-        myQCustomQWidget.openBtn.clicked.connect(lambda: self.openFile(commodityFbx))
-        myQCustomQWidget.importBtn.clicked.connect(lambda: self.importFile(commodityFbx))
+        self.myQCustomQWidget.openBtn.clicked.connect(lambda: self.openFile(commodityFbx))
+        self.myQCustomQWidget.importBtn.clicked.connect(lambda: self.importFile(commodityFbx))
 
         # 设置列表组件大小为自定义组件的大小
-        myQListWidgetItem.setSizeHint(myQCustomQWidget.sizeHint())
+        myQListWidgetItem.setSizeHint(self.myQCustomQWidget.sizeHint())
 
         # 添加自定义组件到列表组件
-        self.commodityList.setItemWidget(myQListWidgetItem, myQCustomQWidget)
+        self.commodityList.setItemWidget(myQListWidgetItem, self.myQCustomQWidget)
 
     def importFile(self, path):
         customMaya.importMeshFile(path)
@@ -472,3 +567,51 @@ class commodityLibraryUI(QtWidgets.QWidget):
 
     def openExplorer(self, path):
         os.system("explorer.exe %s" % path)
+
+    def flitCommodity(self, btn):
+        if btn.text() == u'名称' and btn.isChecked() is True:
+            self.refreshCommodityList(self.commodityNames)
+        if btn.text() == u'sku' and btn.isChecked() is True:
+            self.refreshCommodityList(self.commoditySKU)
+        if btn.text() == u'完成度' and btn.isChecked() is True:
+            self.refreshCommodityList(self.commodityMakeState)
+        if btn.text() == u'制作人' and btn.isChecked() is True:
+            self.refreshCommodityList(self.commodityMaker)
+
+    def setCommodityNumber(self, num):
+        self.commodityNmuber.setText('总计：%s/%s' % (str(num), len(self.commoditySKU)))
+
+    # 监听窗口事件
+    def resizeEvent(self, event):
+        self.refreshCommodityList(self.commodityNames)
+        # print self.width()
+        # QtWidgets.QWidget.resizeEvent(self, event)
+
+    def setNameText(self, width, text):
+
+        if width < 450 and len(text) > 4:
+            nt = u'名称：' + text[:4] + u'···'
+            self.myQCustomQWidget.setNameText(nt)
+        else:
+            self.myQCustomQWidget.setNameText(u'名称：' + text)
+
+    def searchCommodity(self):
+        text = self.searchInput.text()
+        if re.compile(u'[\u4e00-\u9fa5]').search(text):
+            if text in ''.join(Makers):
+                for i in self.commodityMaker:
+                    if text in i.keys():
+                        self.commodityList.append(i)
+            else:
+                for i in self.commodityNames:
+                    if text in i.keys()[0]:
+                        self.commodityList.append(i)
+        else:
+            for i in self.commoditySKU:
+                if text in i.keys()[0]:
+                    self.commodityList.append(i)
+
+        self.refreshCommodityList(self.commodityList)
+
+    def lll(self):
+        print self.frameGeometry()
