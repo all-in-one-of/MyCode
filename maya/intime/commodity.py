@@ -430,7 +430,6 @@ class commodityLibraryUI(QtWidgets.QWidget):
 
         # 分类框
 
-
         self.commodityNmuber = QtWidgets.QLabel()
 
         self.radioBtn0 = QtWidgets.QRadioButton('名称')
