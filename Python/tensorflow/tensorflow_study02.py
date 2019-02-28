@@ -1,26 +1,20 @@
-import os 
+import os
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 
 
-a = tf.constant([[1.],[2.]])  # 定义张量a，为常数constant,1.0,2.0
-b = tf.constant([[3., 4.]])  
-x = tf.constant([[1.,2.]])
-y = tf.constant([[3.],[4.]])
-# a = x+y # 搭建网路，不参与运算
-c = tf.matmul(a,b)
-# Tensor("add:0", shape=(2,), dtype=float32) add:0 节点名称、第0个输出，shape=（2，）维度、一维数组，dtype=float32 数据类型
-# shape=(2,) 第一个维度里有两个元素
+# 定义输入和参数
+x = tf.constant([[.7, .5]])
+w1 = tf.Variable(tf.random_normal([2, 3], stddev=1, seed=1))
+w2 = tf.Variable(tf.random_normal([3, 1], stddev=1, seed=1))
 
-# w = tf.Variable(tf.random_normal([2,3], stddev=2, mean=0, seed=1))
+# 定义向前传播过程
+a =tf.matmul(x,w1)
+y = tf.matmul(a,w2)
 
-# tf.random_normal() 正态分布
-# tf.truncated_normal() 去掉过大偏离点的正态分布
-# tf.random_uniform() 平均分布
-
-
-
-
+# 运行
 with tf.Session()as sess:
-    # print(sess.run(a))
-    print(sess.run(c))
+    init_op = tf.global_variables_initializer()
+    sess.run(init_op)
+    print("y in tf05前向传播 is:\n", sess.run(y))

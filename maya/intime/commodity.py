@@ -357,10 +357,6 @@ class QCustomQWidget(QtWidgets.QWidget):
         self.setLayout(self.allQHBoxLayout)
 
     def setIcon(self, imagePath):
-        # if os.path.exists(imagePath):
-        #     self.iconBtn.setIcon(QtGui.QPixmap(imagePath))
-        # else:
-        #     self.iconBtn.setIcon(QtGui.QPixmap(ImageLose))
         self.iconBtn.setIcon(QtGui.QPixmap(imagePath))
 
         self.iconBtn.setIconSize(QtCore.QSize(50, 50))
@@ -400,19 +396,24 @@ class commodityLibraryUI(QtWidgets.QWidget):
             parent.show()
 
         super(commodityLibraryUI, self).__init__(parent=parent)
-        self.commodityList = []
 
         self.setMinimumWidth(370)
         self.createWidgets()
         self.createLayouts()
-        self.initCommodityInfo()
+        cc = r'C:\Users\Intime\Documents\MyCode\maya\intime'
+        self.initCommodityInfo(RDX)
         self.flitCommodity(self.radioBtn0)
+        self.lineEditCompleter()
 
         self.parent().layout().addWidget(self)
 
     def createWidgets(self):
+
+        self.testBtn = QtWidgets.QPushButton()
+
         # 列表框
         self.commodityList = QtWidgets.QListWidget()
+        self.commodityList.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
         # 搜索框
         self.searchInput = QtWidgets.QLineEdit()
@@ -422,8 +423,13 @@ class commodityLibraryUI(QtWidgets.QWidget):
         self.searchLayout = QtWidgets.QHBoxLayout()
         self.searchLayout.addWidget(self.searchInput)
         self.searchLayout.addWidget(self.searchBtn)
+        self.searchInput.returnPressed.connect(self.searchCommodity)
+
+        # self.searchLayout.addWidget(self.testBtn)
+        # self.testBtn.clicked.connect(self.lll)
 
         # 分类框
+
 
         self.commodityNmuber = QtWidgets.QLabel()
 
@@ -440,6 +446,7 @@ class commodityLibraryUI(QtWidgets.QWidget):
         self.radioBtn0.setChecked(True)
 
         self.radioLayout = QtWidgets.QHBoxLayout()
+
         self.radioLayout.addWidget(self.commodityNmuber)
         self.radioLayout.addWidget(self.radioBtn0)
         self.radioLayout.addWidget(self.radioBtn1)
@@ -498,8 +505,8 @@ class commodityLibraryUI(QtWidgets.QWidget):
             originalCommodityImage = commodityOriginalInfo[u'商品图片地址']
 
             cacheImage = os.path.join(TempPath, os.path.basename(originalCommodityImage))
-            imageSize = (64,64)
-            if os.path.exists(originalCommodityImage) is False:
+            imageSize = (64, 64)
+            if os.path.exists(cacheImage) is False:
                 try:
                     customMaya.imageSaveAs(originalCommodityImage,
                                            cacheImage,
@@ -512,18 +519,19 @@ class commodityLibraryUI(QtWidgets.QWidget):
                     self.commodityIcon[commodityOriginalSKU] = cacheImage
 
             else:
-                try:
-                    customMaya.imageSaveAs(originalCommodityImage,
-                                           cacheImage,
-                                           imageSize)
-                    self.commodityIcon[commodityOriginalSKU] = cacheImage
-                except:
-                    customMaya.imageSaveAs(ImageLose,
-                                           cacheImage,
-                                           (50, 50))
-                    self.commodityIcon[commodityOriginalSKU] = cacheImage
+                # try:
+                #     customMaya.imageSaveAs(originalCommodityImage,
+                #                            cacheImage,
+                #                            imageSize)
+                #     self.commodityIcon[commodityOriginalSKU] = cacheImage
+                # except:
+                #     customMaya.imageSaveAs(ImageLose,
+                #                            cacheImage,
+                #                            (50, 50))
+                self.commodityIcon[commodityOriginalSKU] = cacheImage
+        self.commodityInfoList = self.commodityNames
 
-            # break
+        # break
 
     def readCommodity(self, sku):
         # 自定义组件
@@ -547,17 +555,22 @@ class commodityLibraryUI(QtWidgets.QWidget):
         self.myQCustomQWidget.setMakeState(commodityInfo[u'制作状态'])
         self.myQCustomQWidget.inspectorText.setText('审核人：%s' % commodityInfo[u'审核人'].encode('utf-8'))
         self.myQCustomQWidget.projectAcceptanceText.setText('对接人：%s' % commodityInfo[u'对接人'].encode('utf-8'))
-
         # 按钮
         commodityFbx = commodityInfo[u'规格'][u'finally'][u'模型'][u'收藏级'][u'fbx文件地址']
         self.myQCustomQWidget.openBtn.clicked.connect(lambda: self.openFile(commodityFbx))
         self.myQCustomQWidget.importBtn.clicked.connect(lambda: self.importFile(commodityFbx))
+        self.setBtn(self.myQCustomQWidget.importBtn, commodityInfo[u'制作状态'])
+        self.setBtn(self.myQCustomQWidget.openBtn, commodityInfo[u'制作状态'])
 
         # 设置列表组件大小为自定义组件的大小
         myQListWidgetItem.setSizeHint(self.myQCustomQWidget.sizeHint())
 
         # 添加自定义组件到列表组件
         self.commodityList.setItemWidget(myQListWidgetItem, self.myQCustomQWidget)
+        # myQListWidgetItem.setText('  ' + sku)
+        # # myQListWidgetItem.setTextAlignment(QtCore.Qt.AlignCenter)
+        # # myQListWidgetItem.setTextColor(QtGui.QColor('#282828'))
+        # self.commodityList.setItemSelected(myQListWidgetItem, True)
 
     def importFile(self, path):
         customMaya.importMeshFile(path)
@@ -569,21 +582,48 @@ class commodityLibraryUI(QtWidgets.QWidget):
         os.system("explorer.exe %s" % path)
 
     def flitCommodity(self, btn):
+
+        a = self.commodityInfoList
         if btn.text() == u'名称' and btn.isChecked() is True:
-            self.refreshCommodityList(self.commodityNames)
-        if btn.text() == u'sku' and btn.isChecked() is True:
-            self.refreshCommodityList(self.commoditySKU)
-        if btn.text() == u'完成度' and btn.isChecked() is True:
-            self.refreshCommodityList(self.commodityMakeState)
-        if btn.text() == u'制作人' and btn.isChecked() is True:
-            self.refreshCommodityList(self.commodityMaker)
+            # self.refreshCommodityList(self.commodityNames)
+            a = []
+            for i in self.commodityInfoList:
+                b = {}
+                for sku in i.values():
+                    b[self.commodityInfo[sku][u'商品名称']] = sku
+                    a.append(b)
+            customMaya.chineseSort(a)
+
+
+        elif btn.text() == u'sku' and btn.isChecked() is True:
+            pass
+        elif btn.text() == u'完成度' and btn.isChecked() is True:
+            a = []
+            for i in self.commodityInfoList:
+                b = {}
+                for sku in i.values():
+                    b[self.commodityInfo[sku][u'制作状态']] = sku
+                    a.append(b)
+            a.sort()
+
+        elif btn.text() == u'制作人' and btn.isChecked() is True:
+            a = []
+            for i in self.commodityInfoList:
+                b = {}
+                for sku in i.values():
+                    b[self.commodityInfo[sku][u'制作人']] = sku
+                    a.append(b)
+            customMaya.chineseSort(a)
+
+        self.commodityInfoList = a
+        self.refreshCommodityList(self.commodityInfoList)
 
     def setCommodityNumber(self, num):
         self.commodityNmuber.setText('总计：%s/%s' % (str(num), len(self.commoditySKU)))
 
     # 监听窗口事件
     def resizeEvent(self, event):
-        self.refreshCommodityList(self.commodityNames)
+        self.refreshCommodityList(self.commodityInfoList)
         # print self.width()
         # QtWidgets.QWidget.resizeEvent(self, event)
 
@@ -597,21 +637,42 @@ class commodityLibraryUI(QtWidgets.QWidget):
 
     def searchCommodity(self):
         text = self.searchInput.text()
+        self.commodityInfoList = []
         if re.compile(u'[\u4e00-\u9fa5]').search(text):
             if text in ''.join(Makers):
                 for i in self.commodityMaker:
                     if text in i.keys():
-                        self.commodityList.append(i)
+                        self.commodityInfoList.append(i)
+                        self.radioBtn3.setChecked(True)
             else:
                 for i in self.commodityNames:
                     if text in i.keys()[0]:
-                        self.commodityList.append(i)
+                        self.commodityInfoList.append(i)
+                        self.radioBtn0.setChecked(True)
+
         else:
             for i in self.commoditySKU:
                 if text in i.keys()[0]:
-                    self.commodityList.append(i)
+                    self.commodityInfoList.append(i)
+                    self.radioBtn1.setChecked(True)
 
-        self.refreshCommodityList(self.commodityList)
+        self.refreshCommodityList(self.commodityInfoList)
 
     def lll(self):
-        print self.frameGeometry()
+        print self.commodityList.selectedItems()[0].text()
+
+    def setBtn(self, btn, num):
+        if num <= 1:
+            btn.setEnabled(False)
+
+    def lineEditCompleter(self):
+        items = []
+        for i in self.commodityNames:
+            for k, v in i.items():
+                if k not in items:
+                    items.append(k)
+                if v not in items:
+                    items.append(v)
+        self.completer = QtWidgets.QCompleter(items)
+        # self.completer.setMaxVisibleItems(100)
+        self.searchInput.setCompleter(self.completer)
