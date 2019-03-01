@@ -1,9 +1,0 @@
-embeddings {
-  tensor_name: "embedding:0"
-  metadata_path: "C:\\Users\\Intime\\Documents\\MyCode\\Python\\tensorflow/projector/projector/metadata.tsv"
-  sprite {
-    image_path: "C:\\Users\\Intime\\Documents\\MyCode\\Python\\tensorflow/projector/data/mnist_10k_sprite.png"
-    single_image_dim: 28
-    single_image_dim: 28
-  }
-}
