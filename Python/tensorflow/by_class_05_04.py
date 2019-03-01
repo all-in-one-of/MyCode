@@ -5,14 +5,18 @@
 @Author  : Intime
 @Software: PyCharm
 """
+import getpass
+import os
+import shutil
+
 import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 from tensorflow.contrib.tensorboard.plugins import projector
 from tensorflow.python import VariableV1
 
-DIR = r'C:\Users\Intime\Documents\MyCode\Python\tensorflow/'
-mnist = input_data.read_data_sets(DIR+'MNIST_data/', one_hot=True)
+DIR = 'C:/Users/' + getpass.getuser() + '/Documents/MyCode/Python/tensorflow/'
+mnist = input_data.read_data_sets(DIR + 'MNIST_data/', one_hot=True)
 
 max_steps = 1001
 
@@ -64,7 +68,7 @@ with tf.name_scope('layer'):
 with tf.name_scope('loss'):
     # 交叉熵代价函数
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
-    tf.summary.scalar('loss',loss)
+    tf.summary.scalar('loss', loss)
 with tf.name_scope('train'):
     # 使用梯度下降法
     train_step = tf.train.GradientDescentOptimizer(0.5).minimize(loss)
@@ -83,8 +87,9 @@ with tf.name_scope('accuracy'):
         tf.summary.scalar('accuracy', accuracy)
 
 # 产生metadata文件
-if tf.gfile.Exists(DIR + 'projector/projector/metadata.tsv'):
-    tf.gfile.DeleteRecursively(DIR + 'projector/projector/metadata.tsv')
+shutil.rmtree(DIR + 'projector/projector')
+os.mkdir(DIR + 'projector/projector')
+
 with open(DIR + 'projector/projector/metadata.tsv', 'w')as f:
     labels = sess.run(tf.argmax(mnist.test.labels[:], 1))
     for i in range(image_num):
