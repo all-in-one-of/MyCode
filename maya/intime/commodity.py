@@ -41,6 +41,10 @@ RDX = r'F:\Share\2018\rdx'
 
 ImageLose = r'C:\Users\Intime\Documents\MyCode\maya\intime\imageLose.jpg'
 
+
+
+
+
 MakeState = {
     0: '未制作',
     1: '制作中···',

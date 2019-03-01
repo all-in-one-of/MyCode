@@ -2,55 +2,55 @@ import json
 # encoding=utf-8
 import math
 import os
-import shutil
-import time
+# import shutil
+# import time
+#
+# import win32con
+#
+# import win32gui
+# from pykeyboard import PyKeyboard
+# from pymouse import PyMouse
+# from selenium import webdriver
+# from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+# from selenium.webdriver.support import expected_conditions as EC
+# from selenium.webdriver.support.select import Select
+#
 
-import win32con
-
-import win32gui
-from pykeyboard import PyKeyboard
-from pymouse import PyMouse
-from selenium import webdriver
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.select import Select
-
-
-def findSpecifiedFile(path, suffix=''):
-    '''
-    查找指定文件
-    :param path: 根目录
-    :param suffix: 格式，默认是空
-    :return: 文件地址列表
-    '''
-    _file = []
-    for root, dirs, fils in os.walk(path):
-        for file in fils:
-            if file.endswith(suffix):
-                _file.append(os.path.join(root, file))
-    return _file
-
-
-a = findSpecifiedFile(r'F:\Share\2018\rdx', 'json')
-# a = findSpecifiedFile(r'C:\Users\Intime\Documents\MyCode\maya\intime', 'json')
-
-for i in a:
-    # with open(i, 'r',encoding='utf-8')as f:
-    #     _info = json.load(f)
-    # with open(i, 'w')as f:
-    #     json.dump(_info, f,indent=2, ensure_ascii=False)
-    with open(i,'r',encoding='utf-8') as f:
-        _info = json.load(f)
-        _info[u'制作状态'] = 4
-
-        # json.dumps(_info,indent=2,ensure_ascii=False)
-    with open(i,'w',encoding='utf-8')as f:
-        json.dump(_info, f,indent=2,ensure_ascii=False)
-    print(i)
-
-
-
-
+# def findSpecifiedFile(path, suffix=''):
+#     '''
+#     查找指定文件
+#     :param path: 根目录
+#     :param suffix: 格式，默认是空
+#     :return: 文件地址列表
+#     '''
+#     _file = []
+#     for root, dirs, fils in os.walk(path):
+#         for file in fils:
+#             if file.endswith(suffix):
+#                 _file.append(os.path.join(root, file))
+#     return _file
+#
+#
+# a = findSpecifiedFile(r'F:\Share\2018\rdx', 'json')
+# # a = findSpecifiedFile(r'C:\Users\Intime\Documents\MyCode\maya\intime', 'json')
+#
+# for i in a:
+#     # with open(i, 'r',encoding='utf-8')as f:
+#     #     _info = json.load(f)
+#     # with open(i, 'w')as f:
+#     #     json.dump(_info, f,indent=2, ensure_ascii=False)
+#     with open(i,'r',encoding='utf-8') as f:
+#         _info = json.load(f)
+#         _info[u'制作状态'] = 4
+#
+#         # json.dumps(_info,indent=2,ensure_ascii=False)
+#     with open(i,'w',encoding='utf-8')as f:
+#         json.dump(_info, f,indent=2,ensure_ascii=False)
+#     print(i)
+#
+#
+#
+#
 
 #
 # def changeTime(allTime):
