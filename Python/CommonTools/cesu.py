@@ -94,14 +94,15 @@ class InTimeWebUpload():
         login_button = driver.find_element_by_css_selector(
             '#loginform > form > div:nth-child(3) > div > input.btn.btn-success.radius.size-L')  # 登陆
         login_button.click()
+        b = driver.find_elements_by_xpath('//*[@id="menu-article"]/dt/i[2]')  # 商品管理选单
+        b[1].click()
+        c = driver.find_elements_by_xpath('//*[@id="menu-article"]/dd/ul/li[1]/a')  # 商品管理
+
+        c[1].click()
 
     def add_commodity(self, commodity):
         with open(commodity, 'r', encoding='utf-8') as f:
             commodity_info = json.load(f)
-        b = driver.find_elements_by_xpath('//*[@id="menu-article"]/dt/i[2]')  # 商品管理选单
-        b[1].click()
-        c = driver.find_elements_by_xpath('//*[@id="menu-article"]/dd/ul/li[1]/a')  # 商品管理
-        c[1].click()
         driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[1])  # 选择商品管理frame
 
         driver.find_element_by_css_selector(
@@ -191,7 +192,9 @@ class InTimeWebUpload():
 
         up_image_button = driver.find_element_by_xpath('//*[@id="image"]/div[2]/label')  # 图片上传按钮
         up_image_button.click()
-        upfile(commodity_info['商品图片地址'].replace('//', '\\'))
+        imagePath = commodity_info['商品图片地址'].replace('//', '\\')
+        print(imagePath)
+        upfile(imagePath)
 
         skin_file = driver.find_element_by_name('skin_file')  # 皮肤包文件
         skin_file.send_keys(commodity_info['规格']['finally']['材质包地址'])
@@ -204,15 +207,17 @@ class InTimeWebUpload():
 
         self.up_option(commodity_info, revise)
 
-        status1 = driver.find_element_by_xpath('//*[@id="form-add-edit"]/div[20]/div[1]/div[1]/label')  # 上架
-        status0 = driver.find_element_by_xpath('//*[@id="form-add-edit"]/div[20]/div[1]/div[2]/label')  # 下架
+        status1 = driver.find_element_by_css_selector('#form-add-edit > div:nth-child(21) > div.formControls.col-5.skin-minimal > div:nth-child(1) > div')  # 上架
+        status0 = driver.find_element_by_xpath('//*[@id="form-add-edit"]/div[21]/div[1]/div[2]/label')  # 下架
 
         position = driver.find_element_by_id('position')  # 排序
         position.clear()
         position.send_keys(commodity_info['排序'])
 
-        submit = driver.find_element_by_css_selector('#form-add-edit > div:nth-child(22) > div > input')  # 提交
+        submit = driver.find_element_by_css_selector('#form-add-edit > div:nth-child(23) > div > input')  # 提交
+        print('aaaa')
         submit.click()
+
         time.sleep(4)
 
     def up_option(self, commodity_info, revise):
@@ -239,7 +244,11 @@ class InTimeWebUpload():
                             2 + i))  # 图片上传按钮
                 # up_image.append(option_image_button)
                 option_image_button.click()
-                upfile(info['渲染图片地址'].replace('//', '\\'))
+
+                imageR = info['渲染图片地址']
+                if '//' in imageR:
+                    info['渲染图片地址'].replace('//', '\\')
+                upfile(imageR)
                 # time.sleep(0.5)
                 option_model_file = driver.find_elements_by_name('option_model_file')[i]  # 规格模型文件
                 option_model_file.send_keys(info['模型包地址'])
@@ -271,7 +280,10 @@ class InTimeWebUpload():
                                 2 + i))  # 图片上传按钮
                     # up_image.append(option_image_button)
                     option_image_button.click()
-                    upfile(info['渲染图片地址'].replace('//', '\\'))
+                    imageR = info['渲染图片地址']
+                    if '//' in imageR:
+                        info['渲染图片地址'].replace('//', '\\')
+                    upfile(imageR)
                     # time.sleep(0.5)
                     option_model_file = driver.find_elements_by_name('option_model_file')[i]  # 规格模型文件
                     option_model_file.send_keys(info['模型包地址'])
@@ -301,11 +313,9 @@ if __name__ == '__main__':
     it = InTimeWebUpload()
     it.login()
 
-    # for i in findSpecifiedFile(r'D:\test','json'):
-    #
-    #     it.add_commodity(i)
+    for i in findSpecifiedFile(r'D:\newGoods','json'):
 
-    # it.add_commodity(findSpecifiedFile(r'D:\test', 'json')[2])
+        it.add_commodity(i)
 
     end = time.time()
     print(changeTime(end - start))
