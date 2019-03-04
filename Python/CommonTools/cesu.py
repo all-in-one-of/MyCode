@@ -207,7 +207,8 @@ class InTimeWebUpload():
 
         self.up_option(commodity_info, revise)
 
-        status1 = driver.find_element_by_css_selector('#form-add-edit > div:nth-child(21) > div.formControls.col-5.skin-minimal > div:nth-child(1) > div')  # 上架
+        status1 = driver.find_element_by_css_selector(
+            '#form-add-edit > div:nth-child(21) > div.formControls.col-5.skin-minimal > div:nth-child(1) > div')  # 上架
         status0 = driver.find_element_by_xpath('//*[@id="form-add-edit"]/div[21]/div[1]/div[2]/label')  # 下架
 
         position = driver.find_element_by_id('position')  # 排序
@@ -313,13 +314,12 @@ if __name__ == '__main__':
     it = InTimeWebUpload()
     it.login()
 
-    for i in findSpecifiedFile(r'D:\newGoods','json'):
-
-        it.add_commodity(i)
+    for i in ['z026', 'z027']:
+        jsonFile = os.path.join('D:/newGoods', '%s/%s.json' % (i, i))
+        it.add_commodity(jsonFile)
 
     end = time.time()
     print(changeTime(end - start))
     # modification(driver)
 
     # print(commodity_info['finally']['渲染图片地址'].replace('//','\\'))
-

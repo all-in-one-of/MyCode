@@ -69,10 +69,16 @@ def createDirectory(directory):
         os.mkdir(directory)
 
 
-def imageSaveAs(oPath, tPath, size):
+def imageSaveAs(oPath, size, tPath=None, suffix=None):
+    if tPath is None and suffix is None:
+        tPath = oPath
+    elif suffix is True:
+        tPath = oPath.replace(oPath.split('.')[-1], suffix)
     im = Image.open(oPath)
+    print 'a'
     im = im.resize(size, Image.ANTIALIAS)
     im.save(tPath)
+    return im
 
 
 # **************************************************************
@@ -167,6 +173,7 @@ def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
 
         if img.endswith('%s_m.png' % name):
             metallicTex = os.path.join(direcotory, img)
+            imageSaveAs(metallicTex, (512, 512))
             metallic = cmds.shadingNode('file', at=True, name='T_' + name + '_m')
             cmds.setAttr(shader + '.use_metallic_map', 1)
             cmds.connectAttr(metallic + '.outColor', shader + '.TEX_metallic_map')
@@ -232,8 +239,6 @@ def initializeTurtle():
     cmds.connectAttr(tBakeLayer + ".index", tbakeLayerMgr + ".bakeLayerId[0]")
 
     # cmds.connectAttr(mesh + ".instObjGroups[0]", tBakeLayer + ".dagSetMembers[0]")
-    pm.mel.eval(
-        'ilrTextureBakeCmd -target "pPlaneShape1" -frontRange 0 -backRange 200 -frontBias 0 -backBias -100 -transferSpace 1 -selectionMode 0 -mismatchMode 0 -envelopeMode 0 -ignoreInconsistentNormals 1 -considerTransparency 0 -transparencyThreshold 0.001000000047 -camera "persp" -normalDirection 0 -shadows 1 -alpha 1 -viewDependent 0 -orthoRefl 1 -backgroundColor 0 0 0 -frame 1 -bakeLayer TurtleDefaultBakeLayer -width 512 -height 512 -saveToRenderView 0 -saveToFile 1 -directory "D:/HKW/mayacontroller/turtle/bakedTextures/" -fileName "baked_$p_$s.$e" -fileFormat 9 -visualize 0 -uvRange 0 -uMin 0 -uMax 1 -vMin 0 -vMax 1 -uvSet "" -tangentUvSet "" -edgeDilation 5 -bilinearFilter 1 -merge 0 -conservative 0 -windingOrder 1 -fullShading 1 -useRenderView 1 -layer defaultRenderLayer')
 
 
 def createShadow(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
@@ -244,6 +249,14 @@ def createShadow(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
     '''
     if cmds.ls(sl=True, type='dagNode'):
         meshName = cmds.ls(sl=True, type='dagNode')[0]
+        if meshName != 'pPlane1':
+            bbox = cmds.exactWorldBoundingBox(meshName)
+            extend = 15
+            shdowsX = (bbox[3] - bbox[0]) + extend
+            shdowsZ = (bbox[5] - bbox[2]) + extend
+            sPlane = cmds.polyPlane(w=shdowsX, h=shdowsZ, sx=1, sy=1)
+            meshName = sPlane[0]
+
     else:
         cmds.warning(u'未选择模型')
         return
@@ -263,22 +276,19 @@ def createShadow(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
         cmds.sets(meshName, e=True, fe=shading_group)
 
     else:
-        bbox = cmds.exactWorldBoundingBox(meshName)
-        extend = 15
-        shdowsX = (bbox[3] - bbox[0]) + extend
-        shdowsZ = (bbox[5] - bbox[2]) + extend
-        sPlane = cmds.polyPlane(w=shdowsX, h=shdowsZ, sx=1, sy=1)
+        initializeTurtle()
         sShader = cmds.shadingNode('ilrOccSampler', asShader=True)
-        cmds.select(sPlane[0])
+        cmds.select(meshName)
         cmds.hyperShade(a=sShader, assign=True)
         cmds.setAttr('%s.maxSamples' % sShader, 512)
         cmds.setAttr('%s.minSamples' % sShader, 128)
 
         cmds.setAttr('%s.output' % sShader, 3)
         cmds.setAttr('%s.enableAdaptiveSampling' % sShader, 0)
+        pm.mel.eval(
+            'ilrTextureBakeCmd -target "pPlaneShape1" -frontRange 0 -backRange 200 -frontBias 0 -backBias -100 -transferSpace 1 -selectionMode 0 -mismatchMode 0 -envelopeMode 0 -ignoreInconsistentNormals 1 -considerTransparency 0 -transparencyThreshold 0.001000000047 -camera "persp" -normalDirection 0 -shadows 1 -alpha 1 -viewDependent 0 -orthoRefl 1 -backgroundColor 0 0 0 -frame 1 -bakeLayer TurtleDefaultBakeLayer -width 512 -height 512 -saveToRenderView 0 -saveToFile 1 -directory "D:/HKW/rdx/turtle/bakedTextures/" -fileName "baked_$p_$s.$e" -fileFormat 9 -visualize 0 -uvRange 0 -uMin 0 -uMax 1 -vMin 0 -vMax 1 -uvSet "" -tangentUvSet "" -edgeDilation 5 -bilinearFilter 1 -merge 0 -conservative 0 -windingOrder 1 -fullShading 1 -useRenderView 1 -layer defaultRenderLayer')
 
-        initializeTurtle()
-        cmds.select(sPlane[0])
+        cmds.select(meshName)
         aoMapAdjust(os.path.join(direcotory, 'T_%s_s.png' % name),
                     os.path.join(MAYAPROJECT, r"turtle\bakedTextures\baked_beauty_pPlaneShape1.png"))
         # img = Image.open(os.path.join(MAYAPROJECT, r"turtle\bakedTextures\baked_beauty_pPlaneShape1.png"))
@@ -292,3 +302,24 @@ def createShadow(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
         # print 'aaaaa'
         # img1.save(os.path.join(direcotory, 'T_%s_s.png' % name))
         createShadow(name)
+
+
+def exportFBX(path, selection=True):
+    if selection is True:
+        cmds.FBXExport('-file', path, '-s')
+    if selection is False:
+        cmds.FBXExport('-file', path)
+
+
+def saveScreenshot(name, directory):
+    # 图片保存路径
+    cmds.setAttr("perspShape.focalLength",60)
+    path = os.path.join(directory, '%s.jpg' % name)
+
+    cmds.viewFit(f=1)  # 聚焦物体
+    cmds.setAttr('defaultRenderGlobals.imageFormat', 8)  # 设置默认渲染器图片格式 8位jpg
+    # 使用playblast 的方式保存截图
+    cmds.playblast(completeFilename=path, forceOverwrite=True, format='image', width=2048, height=2048,
+                   showOrnaments=False, startTime=1, endTime=1, viewer=False)
+
+    return path
