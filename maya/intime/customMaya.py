@@ -100,7 +100,6 @@ def fitView(f=1):
     cmds.viewFit(f=f)
 
 
-#
 def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
     '''
     创建pbs

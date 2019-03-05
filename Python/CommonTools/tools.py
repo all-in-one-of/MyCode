@@ -7,7 +7,6 @@ import datetime
 import time
 import numpy
 import cv2
-import name
 from win32gui import *
 import win32gui
 import win32con
