@@ -12,7 +12,7 @@ import shutil
 import linecache
 from PIL import Image, ImageChops, ImageOps, ImageFilter
 import json
-
+import time
 
 def changeTime(allTime):
     day = 24 * 60 * 60
@@ -30,6 +30,9 @@ def changeTime(allTime):
         mins = divmod(allTime, min)
         return "%d mins, %d sec" % (int(mins[0]), math.ceil(mins[1]))
 
+def customStrftime(t):
+    a = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(t))
+    return a
 
 def createDirectory(directory):
     '''
@@ -105,6 +108,9 @@ def writeJson(jsonPath, info):
 def detectionChinese(text):
     b = re.compile(u'[\u4e00-\u9fa5]+').search(text)
     return b
+
+
+
 # # with open(os.path.join(FilePath,'newGoods.json'),'w',encoding='utf-8') as f:
 # for dir in os.listdir(FilePath):
 #     a = {}

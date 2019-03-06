@@ -1,6 +1,6 @@
 {
   "merchants": [
-
+    "映泰科技"
   ],
   "makers": [
     "韩开旺",
@@ -8,5 +8,8 @@
   ],
   "projectAcceptance": [
     "王志文"
-  ]
+  ],
+  "contrast": {
+    "映泰科技": "yingtaikeji"
+  }
 }
