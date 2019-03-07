@@ -11,6 +11,7 @@ import time
 from pypinyin import *
 from usual import *
 import getpass
+
 IntimeInfoJsonPath = r'C:\Users\Intime\Documents\MyCode\InputTool\intimeInfo.json'
 IntimeGoodsDir = r'F:\Share\goods'
 
@@ -163,13 +164,72 @@ def createSKU(goodsInfo):
     return sku
 
 
+def allocatingTask(maker, goodsSKU):
+    intimeInfo = readJson(IntimeInfoJsonPath)
+    merchant = intimeInfo['contrast'][intimeInfo['merchants'][int(goodsSKU[:3])]]
+    goodsJsonPath = os.path.join(IntimeGoodsDir, '%s/%s/%s.json' % (merchant, goodsSKU, goodsSKU))
+    goodsInfo = readJson(goodsJsonPath)
+
+    intimeInfo['makers'][maker]['待领取'].append(goodsSKU)
+    goodsInfo['maker'] = maker
+    goodsInfo['allocatingTime'] = time.time()
+
+    writeJson(IntimeInfoJsonPath, intimeInfo)
+    writeJson(goodsJsonPath, goodsInfo)
+
+
+def pullTask(maker, goodsSKU):
+    intimeInfo = readJson(IntimeInfoJsonPath)
+    merchant = intimeInfo['contrast'][intimeInfo['merchants'][int(goodsSKU[:3])]]
+    goodsJsonPath = os.path.join(IntimeGoodsDir, '%s/%s/%s.json' % (merchant, goodsSKU, goodsSKU))
+    goodsInfo = readJson(goodsJsonPath)
+
+    intimeInfo['makers'][maker]['待领取'].remove(goodsSKU)
+    intimeInfo['makers'][maker]['未完成'].append(goodsSKU)
+    goodsInfo['getTime'] = time.time()
+
+    writeJson(IntimeInfoJsonPath, intimeInfo)
+    writeJson(goodsJsonPath, goodsInfo)
+
+
+def beginMake(maker, goodsSKU):
+    intimeInfo = readJson(IntimeInfoJsonPath)
+    merchant = intimeInfo['contrast'][intimeInfo['merchants'][int(goodsSKU[:3])]]
+    goodsJsonPath = os.path.join(IntimeGoodsDir, '%s/%s/%s.json' % (merchant, goodsSKU, goodsSKU))
+    goodsInfo = readJson(goodsJsonPath)
+
+    intimeInfo['makers'][maker]['未完成'].remove(goodsSKU)
+    intimeInfo['makers'][maker]['正在制作'].append(goodsSKU)
+    goodsInfo['beginMakeTime'] = time.time()
+
+    writeJson(IntimeInfoJsonPath, intimeInfo)
+    writeJson(goodsJsonPath, goodsInfo)
+
+
+def waitFowReview(maker, goodsSKU):
+    intimeInfo = readJson(IntimeInfoJsonPath)
+    merchant = intimeInfo['contrast'][intimeInfo['merchants'][int(goodsSKU[:3])]]
+    goodsJsonPath = os.path.join(IntimeGoodsDir, '%s/%s/%s.json' % (merchant, goodsSKU, goodsSKU))
+    goodsInfo = readJson(goodsJsonPath)
+
+    intimeInfo['makers'][maker]['正在制作'].remove(goodsSKU)
+    intimeInfo['makers'][maker]['等待审核'].append(goodsSKU)
+    goodsInfo['beginMakeTime'] = time.time()
+
+    writeJson(IntimeInfoJsonPath, intimeInfo)
+    writeJson(goodsJsonPath, goodsInfo)
+
+
 if __name__ == '__main__':
-    merchantName = '映泰科技'
-    selectMerchant(merchantName)
-    goodsInfo = {'inputPersonnel': '00',
-                 'name': '疏香桌',
-                 'merchant': '映泰科技',
-                 'classify': '客厅',
-                 'brand': '映像家居',
-                 'series': '公共素材'}
-    createSKU(fillGoodsInfo(goodsInfo))
+    # merchantName = '映泰科技'
+    # selectMerchant(merchantName)
+    # goodsInfo = {'inputPersonnel': '00',
+    #              'name': '测评（双洋 | 简悟角几）',
+    #              'merchant': '映泰科技',
+    #              'classify': '其他',
+    #              'brand': '映像家居',
+    #              'series': '公共素材'}
+    # createSKU(fillGoodsInfo(goodsInfo))
+    #
+
+   allocatingTask('01', '00000200')
