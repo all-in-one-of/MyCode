@@ -6,12 +6,13 @@
 @Software: PyCharm
 """
 import time
-import json
+import datetime
+import os
+from usual import changeTime
+startTime = time.time()
+print(datetime.datetime.now())
 
-from usual import *
-a = readJson(r"F:\Share\goods\yingtaikeji\00000000\00000000.json")
-t1 = a['inputTime']
-
-t2 = time.time()
-
-print(changeTime(t2-t1))
+os.system(r'SimplygonBatch --Input F:\Share\simplygon\inputDir --Output F:\Share\simplygon\outputDir --Spl F:\Share\simplygon\splDir --Temp F:\Share\simplygon\temp --Verbose --OutputFileFormat .fbx')
+endTime = time.time()
+print('用时',changeTime(endTime-startTime))
+print(datetime.datetime.now())

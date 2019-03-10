@@ -1,4 +1,6 @@
 # coding=utf-8
+import shutil
+
 import cv2
 import json
 import os
@@ -75,7 +77,6 @@ def imageSaveAs(oPath, size, tPath=None, suffix=None):
     elif suffix is True:
         tPath = oPath.replace(oPath.split('.')[-1], suffix)
     im = Image.open(oPath)
-    print 'a'
     im = im.resize(size, Image.ANTIALIAS)
     im.save(tPath)
     return im
@@ -144,6 +145,8 @@ def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
     for img in imges:
         if img.endswith('%s_b.png' % name):
             baseTex = os.path.join(direcotory, img)
+            imageSaveAs(baseTex, (2048, 2048))
+
             baseColor = cmds.shadingNode('file', at=True, name='T_' + name + '_b')
             cmds.setAttr(shader + '.use_color_map', 1)
             cmds.connectAttr(baseColor + '.outColor', shader + '.TEX_color_map')
@@ -151,6 +154,8 @@ def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
 
         if img.endswith('%s_n.png' % name):
             noramlTex = os.path.join(direcotory, img)
+            imageSaveAs(baseTex, (2048, 2048))
+
             normal = cmds.shadingNode('file', at=True, name='T_' + name + '_n')
             cmds.setAttr(shader + '.use_normal_map', 1)
             cmds.connectAttr(normal + '.outColor', shader + '.TEX_normal_map')
@@ -158,6 +163,8 @@ def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
 
         if img.endswith('%s_ao.png' % name):
             aoTex = os.path.join(direcotory, img)
+            imageSaveAs(aoTex, (512, 512))
+
             ambientOcclusion = cmds.shadingNode('file', at=True, name='T_' + name + '_ao')
             cmds.setAttr(shader + '.use_ao_map', 1)
             cmds.connectAttr(ambientOcclusion + '.outColor', shader + '.TEX_ao_map')
@@ -165,10 +172,15 @@ def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
 
         if img.endswith('%s_r.png' % name):
             roughnessTex = os.path.join(direcotory, img)
+            imageSaveAs(roughnessTex, (512, 512))
+
             roughness = cmds.shadingNode('file', at=True, name='T_' + name + '_r')
             cmds.setAttr(shader + '.use_roughness_map', 1)
             cmds.connectAttr(roughness + '.outColor', shader + '.TEX_roughness_map')
             cmds.setAttr(roughness + '.fileTextureName', roughnessTex, type='string')
+
+        else:
+            cmds.setAttr(shader + '.roughness', 0.5)
 
         if img.endswith('%s_m.png' % name):
             metallicTex = os.path.join(direcotory, img)
@@ -180,12 +192,16 @@ def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
 
         if img.endswith('%s_e.png' % name):
             emissiveTex = os.path.join(direcotory, img)
+            imageSaveAs(emissiveTex, (512, 512))
+
             emissive = cmds.shadingNode('file', at=True, name='T_' + name + '_e')
             cmds.setAttr(shader + '.use_emissive_map', 1)
             cmds.connectAttr(emissive + '.outColor', shader + '.TEX_emissive_map')
             cmds.setAttr(emissive + '.fileTextureName', emissiveTex, type='string')
 
     cmds.sets(meshName, e=True, fe=shading_group)
+    cmds.select(meshName)
+    return meshName
 
 
 def aoMapAdjust(taImage, imge=r"D:\HKW\mayacontroller\turtle\bakedTextures\baked_beauty_pPlaneShape1.png"):
@@ -290,17 +306,9 @@ def createShadow(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
         cmds.select(meshName)
         aoMapAdjust(os.path.join(direcotory, 'T_%s_s.png' % name),
                     os.path.join(MAYAPROJECT, r"turtle\bakedTextures\baked_beauty_pPlaneShape1.png"))
-        # img = Image.open(os.path.join(MAYAPROJECT, r"turtle\bakedTextures\baked_beauty_pPlaneShape1.png"))
-        # img = img.convert('L')
-        #
-        # img = ImageOps.autocontrast(img)
-        #
-        # img = ImageChops.invert(img)
-        # img1 = Image.new('RGBA', (512, 512), (0, 0, 0, 0))
-        # img1.putalpha(img)
-        # print 'aaaaa'
-        # img1.save(os.path.join(direcotory, 'T_%s_s.png' % name))
+
         createShadow(name)
+    return meshName
 
 
 def exportFBX(path, selection=True):
@@ -312,13 +320,86 @@ def exportFBX(path, selection=True):
 
 def saveScreenshot(name, directory):
     # 图片保存路径
-    cmds.setAttr("perspShape.focalLength",60)
+    cmds.displayRGBColor('backgroundTop', 1, 1, 1)
+    cmds.displayRGBColor('backgroundBottom', 1, 1, 1)
+    cmds.displayRGBColor('background', 1, 1, 1)
+    cmds.setAttr("perspShape.focalLength", 60)
     path = os.path.join(directory, '%s.jpg' % name)
-
+    cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', 1)
     cmds.viewFit(f=1)  # 聚焦物体
     cmds.setAttr('defaultRenderGlobals.imageFormat', 8)  # 设置默认渲染器图片格式 8位jpg
     # 使用playblast 的方式保存截图
     cmds.playblast(completeFilename=path, forceOverwrite=True, format='image', width=2048, height=2048,
                    showOrnaments=False, startTime=1, endTime=1, viewer=False)
+    cmds.displayRGBColor(rs=True)
 
     return path
+
+
+def upTextures(name, directory):
+    textureDir = os.path.join(MAYAPROJECT, 'sourceimages')
+    try:
+        shutil.copy(os.path.join(textureDir, '%s.jpg' % name), directory)
+    except:
+        pass
+    try:
+        shutil.copy(os.path.join(textureDir, 'T_%s_b.png' % name), directory)
+    except:
+        pass
+    try:
+        shutil.copy(os.path.join(textureDir, 'T_%s_n.png' % name), directory)
+    except:
+        pass
+    try:
+        shutil.copy(os.path.join(textureDir, 'T_%s_r.png' % name), directory)
+    except:
+        pass
+    try:
+        shutil.copy(os.path.join(textureDir, 'T_%s_m.png' % name), directory)
+    except:
+        pass
+    try:
+        shutil.copy(os.path.join(textureDir, 'T_%s_e.png' % name), directory)
+    except:
+        pass
+    try:
+        shutil.copy(os.path.join(textureDir, 'T_%s_ao.png' % name), directory)
+    except:
+        pass
+    try:
+        shutil.copy(os.path.join(textureDir, 'T_%s_s.png' % name), directory)
+    except:
+        pass
+
+
+def createMetallicTex(name):
+    for i in os.listdir(MAYAPROJECT):
+        if i.endswith('Diffuse.png'):
+            diffuseImage = os.path.join(MAYAPROJECT,i)
+            break
+        else:
+            diffuseImage = None
+
+    if diffuseImage is None:
+        cmds.error(u'未找到diffuse')
+        return
+
+    im0 = Image.open(diffuseImage)
+
+    im1 = im0.convert('L')
+    im2 = Image.new('L', im0.size, 0)
+
+    b = []
+
+    for x in range(im0.size[0]):
+        for y in range(im0.size[1]):
+            a = im1.getpixel((x, y))
+            if 200 <= a <= 255:
+                b.append((x, y))
+
+    for i in b:
+        im2.putpixel(i, 255)
+        im0.putpixel(i, (226, 191, 141))
+
+    im2.save(os.path.join(MAYAPROJECT, 'sourceimages\T_%s_m.png' % name))
+    im0.save(os.path.join(MAYAPROJECT, 'Diffuse.png'))
