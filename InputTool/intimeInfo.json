@@ -5,12 +5,10 @@
   "makers": {
     "01": {
       "unclaimed": [
-        "00000200"
       ],
       "undone": [],
       "making": [],
       "submitCheck": [
-        "00000000"
       ],
       "waitSubmit": [],
       "modification": [],
@@ -18,17 +16,21 @@
     },
     "02": {
       "unclaimed": [
-        "00000100",
-        "00000300",
-        "00000400",
-        "00000500"
       ],
       "undone": [],
       "making": [],
       "submitCheck": [],
       "waitSubmit": [],
-      "modification": [],
-      "done": []
+      "modification": [
+        "00000000"
+      ],
+      "done": [
+        "00000100",
+        "00000200",
+        "00000300",
+        "00000400",
+        "00000500"
+      ]
     }
   },
   "projectAcceptance": [

@@ -220,7 +220,7 @@ def submitCheck(maker, goodsSKU):
     writeJson(goodsJsonPath, goodsInfo)
 
 
-def checkTask(assessor,goodsSKU,isPass):
+def checkTask(assessor, goodsSKU, isPass):
     intimeInfo = readJson(IntimeInfoJsonPath)
     merchant = intimeInfo['contrast'][intimeInfo['merchants'][int(goodsSKU[:3])]]
     goodsJsonPath = os.path.join(IntimeGoodsDir, '%s/%s/%s.json' % (merchant, goodsSKU, goodsSKU))
@@ -234,9 +234,26 @@ def checkTask(assessor,goodsSKU,isPass):
         intimeInfo['makers'][maker]['modification'].append(goodsSKU)
 
     goodsInfo['checkGoneTime'] = time.time()
-    goodsInfo['assessor']=assessor
+    goodsInfo['assessor'] = assessor
     writeJson(IntimeInfoJsonPath, intimeInfo)
     writeJson(goodsJsonPath, goodsInfo)
+
+
+def doneTask(goodsSKU):
+    intimeInfo = readJson(IntimeInfoJsonPath)
+    merchant = intimeInfo['contrast'][intimeInfo['merchants'][int(goodsSKU[:3])]]
+    goodsJsonPath = os.path.join(IntimeGoodsDir, '%s/%s/%s.json' % (merchant, goodsSKU, goodsSKU))
+    goodsInfo = readJson(goodsJsonPath)
+
+    maker = goodsInfo['maker']
+    intimeInfo['makers'][maker]['waitSubmit'].remove(goodsSKU)
+    intimeInfo['makers'][maker]['done'].append(goodsSKU)
+
+    goodsInfo['doneTime'] = time.time()
+
+    writeJson(IntimeInfoJsonPath, intimeInfo)
+    writeJson(goodsJsonPath, goodsInfo)
+
 
 
 if __name__ == '__main__':
@@ -250,5 +267,4 @@ if __name__ == '__main__':
                  'series': '公共素材'}
     createSKU(fillGoodsInfo(goodsInfo))
 
-
-   # submitCheck('01', '00000000')
+# submitCheck('01', '00000000')

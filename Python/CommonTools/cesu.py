@@ -175,8 +175,9 @@ class InTimeWebUpload():
 
         volume = driver.find_element_by_name('volume')  # 体积
         volume.clear()
-        volume.send_keys('长: %scm  宽: %scm  高: %scm' % (
-            commodity_info['商品长宽高'][0], commodity_info['商品长宽高'][2], commodity_info['商品长宽高'][1]))
+        volume.send_keys('长: %scm  宽: %scm  高: %scm' % (commodity_info['商品长宽高'][0],
+                                                        commodity_info['商品长宽高'][2],
+                                                        commodity_info['商品长宽高'][1]))
 
         style = driver.find_element_by_name('style')  # 风格
         style.clear()
