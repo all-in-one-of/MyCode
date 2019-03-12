@@ -12,6 +12,8 @@ import win32con
 from pymouse import PyMouse
 from pykeyboard import PyKeyboard
 import json
+from IntimeTool.usual import *
+
 
 
 def changeTime(allTime):
@@ -99,6 +101,25 @@ class InTimeWebUpload():
         c = driver.find_elements_by_xpath('//*[@id="menu-article"]/dd/ul/li[1]/a')  # 商品管理
 
         c[1].click()
+
+    def initGoodsInfo(self, json):
+        goodsInfo = readJson(json)
+        self.name = goodsInfo['name']
+        self.subheading = goodsInfo['subheading']
+        self.classify = goodsInfo['classify']
+        self.merchant = goodsInfo['merchant']
+        self.brand = goodsInfo['brand']
+        self.series = goodsInfo['series']
+        self.goodsImage = goodsInfo['goodsImage']
+        self.ArtNo = goodsInfo['Art.No.']
+        self.merchantSKU = goodsInfo['merchantSKU']
+        self.craft = goodsInfo['craft']
+        self.material = goodsInfo['material']
+        self.size = goodsInfo['size']
+        self.style = goodsInfo['style']
+        self.price = goodsInfo['price']
+        self.sku = goodsInfo['sku']
+
 
     def add_commodity(self, commodity):
         with open(commodity, 'r', encoding='utf-8') as f:

@@ -9,10 +9,10 @@ import os
 import time
 
 from pypinyin import *
-from usual import *
+from IntimeTool.usual import *
 import getpass
 
-IntimeInfoJsonPath = r'C:\Users\Intime\Documents\MyCode\InputTool\intimeInfo.json'
+IntimeInfoJsonPath = r"F:\Share\goods\intimeInfo.json"
 IntimeGoodsDir = r'F:\Share\goods'
 
 IntimeInfo = readJson(IntimeInfoJsonPath)
@@ -255,16 +255,56 @@ def doneTask(goodsSKU):
     writeJson(goodsJsonPath, goodsInfo)
 
 
+def fillSpecification(goodsSKU, info):
+    specification = {}
+    try:
+        specification['name'] = info['name']
+    except:
+        specification['name'] = '默认'
+    try:
+        specification['price'] = info['price']
+    except:
+        specification['price'] = 0
+    try:
+        specification['sku'] = info['sku']
+    except:
+        specification['sku'] = 0
+    try:
+        specification['model'] = info['model']
+    except:
+        specification['model'] = 0
+    try:
+        specification['photo'] = info['photo']
+    except:
+        specification['photo'] = 0
+
+
+def addSpecification(goodsSKU, specifications):
+    intimeInfo = readJson(IntimeInfoJsonPath)
+    merchant = intimeInfo['contrast'][intimeInfo['merchants'][int(goodsSKU[:3])]]
+    goodsJsonPath = os.path.join(IntimeGoodsDir, '%s/%s/%s.json' % (merchant, goodsSKU, goodsSKU))
+    goodsInfo = readJson(goodsJsonPath)
+
+    goodsInfo['specifications'] = specifications
+
+    writeJson(goodsJsonPath, goodsInfo)
+
 
 if __name__ == '__main__':
-    merchantName = '映泰科技'
-    selectMerchant(merchantName)
-    goodsInfo = {'inputPersonnel': '00',
-                 'name': '测评（双洋 | 明致沙发）',
-                 'merchant': '映泰科技',
-                 'classify': '其他',
-                 'brand': '映像家居',
-                 'series': '公共素材'}
-    createSKU(fillGoodsInfo(goodsInfo))
+    # merchantName = '映泰科技'
+    # selectMerchant(merchantName)
+    # goodsInfo = {'inputPersonnel': '00',
+    #              'name': '测评（双洋 | 简悟 君子沙发-角几）',
+    #              'merchant': '映泰科技',
+    #              'classify': '其他',
+    #              'brand': '映像家居',
+    #              'series': '公共素材'}
+    # createSKU(fillGoodsInfo(goodsInfo))
 
-# submitCheck('01', '00000000')
+    merchantInfo = readJson(r'F:\Share\goods\yingtaikeji\yingtaikeji.json')
+    merchantPath = r'F:\Share\goods\yingtaikeji'
+    for i in merchantInfo['goodsList']:
+        jsonPath = os.path.join(merchantPath,'%s/%s.json' %(i,i))
+        goodsInfo = readJson(jsonPath)
+        goodsInfo['name']=merchantInfo['contrast'][i]
+        writeJson(jsonPath,goodsInfo)

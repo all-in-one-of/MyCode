@@ -9,7 +9,20 @@ from PIL import Image, ImageChops, ImageOps, ImageFilter
 import pymel.core as pm
 from maya import cmds
 
+
+def createDirectory(directory):
+    '''
+    创建路径，如果文件夹不存在，就创建
+    :param directory (str): 创建文件夹
+    :return:
+    '''
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+    return directory
+
+
 MAYAPROJECT = cmds.workspace(fn=True)
+SOURCEIMAGES = createDirectory(os.path.join(MAYAPROJECT, 'sourceimages'))
 
 
 def findSpecifiedFile(path, suffix=''):
@@ -59,16 +72,6 @@ def readJson(path):
 
 def chineseSort(chinese):
     chinese.sort(key=lambda char: lazy_pinyin(char)[0][0])
-
-
-def createDirectory(directory):
-    '''
-    创建路径，如果文件夹不存在，就创建
-    :param directory (str): 创建文件夹
-    :return:
-    '''
-    if not os.path.exists(directory):
-        os.mkdir(directory)
 
 
 def imageSaveAs(oPath, size, tPath=None, suffix=None):
@@ -300,8 +303,8 @@ def createShadow(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
 
         cmds.setAttr('%s.output' % sShader, 3)
         cmds.setAttr('%s.enableAdaptiveSampling' % sShader, 0)
-        pm.mel.eval(
-            'ilrTextureBakeCmd -target "pPlaneShape1" -frontRange 0 -backRange 200 -frontBias 0 -backBias -100 -transferSpace 1 -selectionMode 0 -mismatchMode 0 -envelopeMode 0 -ignoreInconsistentNormals 1 -considerTransparency 0 -transparencyThreshold 0.001000000047 -camera "persp" -normalDirection 0 -shadows 1 -alpha 1 -viewDependent 0 -orthoRefl 1 -backgroundColor 0 0 0 -frame 1 -bakeLayer TurtleDefaultBakeLayer -width 512 -height 512 -saveToRenderView 0 -saveToFile 1 -directory "D:/HKW/rdx/turtle/bakedTextures/" -fileName "baked_$p_$s.$e" -fileFormat 9 -visualize 0 -uvRange 0 -uMin 0 -uMax 1 -vMin 0 -vMax 1 -uvSet "" -tangentUvSet "" -edgeDilation 5 -bilinearFilter 1 -merge 0 -conservative 0 -windingOrder 1 -fullShading 1 -useRenderView 1 -layer defaultRenderLayer')
+        bakeAO = 'ilrTextureBakeCmd -target "pPlaneShape1" -frontRange 0 -backRange 200 -frontBias 0 -backBias -100 -transferSpace 1 -selectionMode 0 -mismatchMode 0 -envelopeMode 0 -ignoreInconsistentNormals 1 -considerTransparency 0 -transparencyThreshold 0.001000000047 -camera "persp" -normalDirection 0 -shadows 1 -alpha 1 -viewDependent 0 -orthoRefl 1 -backgroundColor 0 0 0 -frame 1 -bakeLayer TurtleDefaultBakeLayer -width 512 -height 512 -saveToRenderView 0 -saveToFile 1 -directory "%s/turtle/bakedTextures/" -fileName "baked_$p_$s.$e" -fileFormat 9 -visualize 0 -uvRange 0 -uMin 0 -uMax 1 -vMin 0 -vMax 1 -uvSet "" -tangentUvSet "" -edgeDilation 5 -bilinearFilter 1 -merge 0 -conservative 0 -windingOrder 1 -fullShading 1 -useRenderView 1 -layer defaultRenderLayer' % MAYAPROJECT
+        pm.mel.eval(bakeAO)
 
         cmds.select(meshName)
         aoMapAdjust(os.path.join(direcotory, 'T_%s_s.png' % name),
@@ -318,12 +321,12 @@ def exportFBX(path, selection=True):
         cmds.FBXExport('-file', path)
 
 
-def saveScreenshot(name, directory):
+def saveScreenshot(name, directory=SOURCEIMAGES):
     # 图片保存路径
     cmds.displayRGBColor('backgroundTop', 1, 1, 1)
     cmds.displayRGBColor('backgroundBottom', 1, 1, 1)
     cmds.displayRGBColor('background', 1, 1, 1)
-    cmds.setAttr("perspShape.focalLength", 60)
+    cmds.setAttr("perspShape.focalLength", 50)
     path = os.path.join(directory, '%s.jpg' % name)
     cmds.setAttr('hardwareRenderingGlobals.multiSampleEnable', 1)
     cmds.viewFit(f=1)  # 聚焦物体
@@ -375,7 +378,7 @@ def upTextures(name, directory):
 def createMetallicTex(name):
     for i in os.listdir(MAYAPROJECT):
         if i.endswith('Diffuse.png'):
-            diffuseImage = os.path.join(MAYAPROJECT,i)
+            diffuseImage = os.path.join(MAYAPROJECT, i)
             break
         else:
             diffuseImage = None
