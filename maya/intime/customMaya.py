@@ -138,6 +138,8 @@ def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
             os.remove(os.path.join(MAYAPROJECT, i))
 
     shaderName = 'M_' + name + '_w'
+    if cmds.objExists(shaderName):
+        cmds.delete(shaderName)
     shader = cmds.shadingNode('StingrayPBS', asShader=True, name=shaderName)
     cmds.shaderfx(sfxnode=shader, initShaderAttributes=True)  # 初始化pbs
 
@@ -149,8 +151,10 @@ def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
         if img.endswith('%s_b.png' % name):
             baseTex = os.path.join(direcotory, img)
             imageSaveAs(baseTex, (2048, 2048))
-
-            baseColor = cmds.shadingNode('file', at=True, name='T_' + name + '_b')
+            tb = 'T_' + name + '_b'
+            if cmds.objExists(tb):
+                cmds.delete(tb)
+            baseColor = cmds.shadingNode('file', at=True, name=tb)
             cmds.setAttr(shader + '.use_color_map', 1)
             cmds.connectAttr(baseColor + '.outColor', shader + '.TEX_color_map')
             cmds.setAttr(baseColor + '.fileTextureName', baseTex, type='string')
@@ -159,7 +163,10 @@ def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
             noramlTex = os.path.join(direcotory, img)
             imageSaveAs(baseTex, (2048, 2048))
 
-            normal = cmds.shadingNode('file', at=True, name='T_' + name + '_n')
+            tn = 'T_' + name + '_n'
+            if cmds.objExists(tn):
+                cmds.delete(tn)
+            normal = cmds.shadingNode('file', at=True, name=tn)
             cmds.setAttr(shader + '.use_normal_map', 1)
             cmds.connectAttr(normal + '.outColor', shader + '.TEX_normal_map')
             cmds.setAttr(normal + '.fileTextureName', noramlTex, type='string')
@@ -168,7 +175,10 @@ def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
             aoTex = os.path.join(direcotory, img)
             imageSaveAs(aoTex, (512, 512))
 
-            ambientOcclusion = cmds.shadingNode('file', at=True, name='T_' + name + '_ao')
+            tao = 'T_' + name + '_ao'
+            if cmds.objExists(tao):
+                cmds.delete(tao)
+            ambientOcclusion = cmds.shadingNode('file', at=True, name=tao)
             cmds.setAttr(shader + '.use_ao_map', 1)
             cmds.connectAttr(ambientOcclusion + '.outColor', shader + '.TEX_ao_map')
             cmds.setAttr(ambientOcclusion + '.fileTextureName', aoTex, type='string')
@@ -177,18 +187,25 @@ def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
             roughnessTex = os.path.join(direcotory, img)
             imageSaveAs(roughnessTex, (512, 512))
 
-            roughness = cmds.shadingNode('file', at=True, name='T_' + name + '_r')
+            tr = 'T_' + name + '_r'
+            if cmds.objExists(tr):
+                cmds.delete(tr)
+            roughness = cmds.shadingNode('file', at=True, name=tr)
             cmds.setAttr(shader + '.use_roughness_map', 1)
             cmds.connectAttr(roughness + '.outColor', shader + '.TEX_roughness_map')
             cmds.setAttr(roughness + '.fileTextureName', roughnessTex, type='string')
 
         else:
-            cmds.setAttr(shader + '.roughness', 0.5)
+            cmds.setAttr(shader + '.roughness', 0.3)
 
         if img.endswith('%s_m.png' % name):
             metallicTex = os.path.join(direcotory, img)
             imageSaveAs(metallicTex, (512, 512))
-            metallic = cmds.shadingNode('file', at=True, name='T_' + name + '_m')
+
+            tm = 'T_' + name + '_m'
+            if cmds.objExists(tm):
+                cmds.delete(tm)
+            metallic = cmds.shadingNode('file', at=True, name=tm)
             cmds.setAttr(shader + '.use_metallic_map', 1)
             cmds.connectAttr(metallic + '.outColor', shader + '.TEX_metallic_map')
             cmds.setAttr(metallic + '.fileTextureName', metallicTex, type='string')
@@ -197,7 +214,10 @@ def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
             emissiveTex = os.path.join(direcotory, img)
             imageSaveAs(emissiveTex, (512, 512))
 
-            emissive = cmds.shadingNode('file', at=True, name='T_' + name + '_e')
+            te = 'T_' + name + '_e'
+            if cmds.objExists(te):
+                cmds.delete(te)
+            emissive = cmds.shadingNode('file', at=True, name=te)
             cmds.setAttr(shader + '.use_emissive_map', 1)
             cmds.connectAttr(emissive + '.outColor', shader + '.TEX_emissive_map')
             cmds.setAttr(emissive + '.fileTextureName', emissiveTex, type='string')
@@ -265,14 +285,22 @@ def createShadow(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
     :param name: 名字
     :param direcotory: 文件夹，默认项目文件夹sourceimages
     '''
+
+
     if cmds.ls(sl=True, type='dagNode'):
         meshName = cmds.ls(sl=True, type='dagNode')[0]
-        if meshName != 'pPlane1':
-            bbox = cmds.exactWorldBoundingBox(meshName)
+        bbox = cmds.exactWorldBoundingBox(meshName)
+        if bbox[1] != 0:
+
             extend = 15
             shdowsX = (bbox[3] - bbox[0]) + extend
             shdowsZ = (bbox[5] - bbox[2]) + extend
-            sPlane = cmds.polyPlane(w=shdowsX, h=shdowsZ, sx=1, sy=1)
+            panleName='shadow'
+
+            if cmds.objExists(panleName):
+                cmds.delete(panleName)
+
+            sPlane = cmds.polyPlane(w=shdowsX, h=shdowsZ, sx=1, sy=1, n=panleName)
             meshName = sPlane[0]
 
     else:
@@ -282,11 +310,17 @@ def createShadow(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
     # 如果有阴影贴图，直接贴
     if 'T_%s_s.png' % name in os.listdir(direcotory):
         shaderName = 'M_' + name + '_s'
+        if cmds.objExists(shaderName):
+            cmds.delete(shaderName)
         shader = cmds.shadingNode('lambert', asShader=True, name=shaderName)
         shading_group = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=shaderName + 'SG')
         cmds.connectAttr(shader + '.outColor', shading_group + '.surfaceShader')
         shadowTex = os.path.join(direcotory, 'T_%s_s.png' % name)
-        shadow = cmds.shadingNode('file', at=True, name='T_' + name + '_s')
+        shadowName = 'T_' + name + '_s'
+
+        if cmds.objExists(shadowName):
+            cmds.delete(shadowName)
+        shadow = cmds.shadingNode('file', at=True, name=shadowName)
         cmds.connectAttr(shadow + '.outColor', shader + '.color')
         cmds.connectAttr(shadow + '.outTransparency', shader + '.transparency')
 
@@ -303,12 +337,14 @@ def createShadow(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
 
         cmds.setAttr('%s.output' % sShader, 3)
         cmds.setAttr('%s.enableAdaptiveSampling' % sShader, 0)
-        bakeAO = 'ilrTextureBakeCmd -target "pPlaneShape1" -frontRange 0 -backRange 200 -frontBias 0 -backBias -100 -transferSpace 1 -selectionMode 0 -mismatchMode 0 -envelopeMode 0 -ignoreInconsistentNormals 1 -considerTransparency 0 -transparencyThreshold 0.001000000047 -camera "persp" -normalDirection 0 -shadows 1 -alpha 1 -viewDependent 0 -orthoRefl 1 -backgroundColor 0 0 0 -frame 1 -bakeLayer TurtleDefaultBakeLayer -width 512 -height 512 -saveToRenderView 0 -saveToFile 1 -directory "%s/turtle/bakedTextures/" -fileName "baked_$p_$s.$e" -fileFormat 9 -visualize 0 -uvRange 0 -uMin 0 -uMax 1 -vMin 0 -vMax 1 -uvSet "" -tangentUvSet "" -edgeDilation 5 -bilinearFilter 1 -merge 0 -conservative 0 -windingOrder 1 -fullShading 1 -useRenderView 1 -layer defaultRenderLayer' % MAYAPROJECT
+        shapes = cmds.listRelatives(meshName, s=True)[0]
+        bakeAO = 'ilrTextureBakeCmd -target "%s" -frontRange 0 -backRange 200 -frontBias 0 -backBias -100 -transferSpace 1 -selectionMode 0 -mismatchMode 0 -envelopeMode 0 -ignoreInconsistentNormals 1 -considerTransparency 0 -transparencyThreshold 0.001000000047 -camera "persp" -normalDirection 0 -shadows 1 -alpha 1 -viewDependent 0 -orthoRefl 1 -backgroundColor 0 0 0 -frame 1 -bakeLayer TurtleDefaultBakeLayer -width 512 -height 512 -saveToRenderView 0 -saveToFile 1 -directory "%s/turtle/bakedTextures/" -fileName "baked_$p_$s.$e" -fileFormat 9 -visualize 0 -uvRange 0 -uMin 0 -uMax 1 -vMin 0 -vMax 1 -uvSet "" -tangentUvSet "" -edgeDilation 5 -bilinearFilter 1 -merge 0 -conservative 0 -windingOrder 1 -fullShading 1 -useRenderView 1 -layer defaultRenderLayer' % (
+            shapes, MAYAPROJECT)
         pm.mel.eval(bakeAO)
 
         cmds.select(meshName)
         aoMapAdjust(os.path.join(direcotory, 'T_%s_s.png' % name),
-                    os.path.join(MAYAPROJECT, r"turtle\bakedTextures\baked_beauty_pPlaneShape1.png"))
+                    os.path.join(MAYAPROJECT, r"turtle\bakedTextures\baked_beauty_%s.png" % shapes))
 
         createShadow(name)
     return meshName
