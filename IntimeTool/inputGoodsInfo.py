@@ -301,6 +301,7 @@ if __name__ == '__main__':
     #              'series': '公共素材'}
     # createSKU(fillGoodsInfo(goodsInfo))
 
+
     merchantInfo = readJson(r'F:\Share\goods\yingtaikeji\yingtaikeji.json')
     merchantPath = r'F:\Share\goods\yingtaikeji'
     for i in merchantInfo['goodsList']:

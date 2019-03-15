@@ -262,7 +262,6 @@ class commodityUI(QtWidgets.QWidget):
         customMaya.openMeshFile(path)
 
     def initCommodityInfo(self, path):
-        print os.getcwd()
         self.commodityInfo = {}
         self.commodityNames = []
         self.commoditySKU = []

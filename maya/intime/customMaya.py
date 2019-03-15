@@ -23,7 +23,7 @@ def createDirectory(directory):
 
 MAYAPROJECT = cmds.workspace(fn=True)
 SOURCEIMAGES = createDirectory(os.path.join(MAYAPROJECT, 'sourceimages'))
-
+UNITYPROJECTPATH = r'F:\Share\createAssetBundels\Assets\yingtaikeji'
 
 def findSpecifiedFile(path, suffix=''):
     '''
@@ -55,6 +55,8 @@ def baseNameForPath(path, suffix=True):
     else:
         name, b = os.path.splitext(name)
         return name
+
+
 
 
 def readJson(path):
@@ -375,12 +377,15 @@ def saveScreenshot(name, directory=SOURCEIMAGES):
     return path
 
 
-def upTextures(name, directory):
+def upTextures(name, directory,goodsImage=False):
     textureDir = os.path.join(MAYAPROJECT, 'sourceimages')
-    try:
-        shutil.copy(os.path.join(textureDir, '%s.jpg' % name), directory)
-    except:
-        pass
+
+    if goodsImage:
+        try:
+            shutil.copy(os.path.join(textureDir, '%s.jpg' % name), directory)
+        except:
+            cmds.warning(u'缺少商品图片')
+            return
     try:
         shutil.copy(os.path.join(textureDir, 'T_%s_b.png' % name), directory)
     except:
@@ -442,3 +447,35 @@ def createMetallicTex(name):
 
     im2.save(os.path.join(MAYAPROJECT, 'sourceimages\T_%s_m.png' % name))
     im0.save(os.path.join(MAYAPROJECT, 'Diffuse.png'))
+
+
+
+def exportTo(name,simplygon=False,unity=False):
+    if simplygon:
+
+        fbxName = os.path.join(r'F:\Share\simplygon\standby', '%s.fbx' % name)
+        cmds.FBXExportEmbeddedTextures('-v', True)
+        cmds.FBXExport('-file', fbxName, '-s')
+
+    elif unity:
+        name = 's'+name
+        dirPath = createDirectory(os.path.join(UNITYPROJECTPATH,name))
+
+        cmds.select(name)
+
+        if cmds.objExists('shadow'):
+            try:
+                cmds.parent('shadow', name)
+            except:
+                cmds.warning(u'未找到',name)
+                return
+
+        else:
+            cmds.warning(u'缺少软阴影')
+            return
+
+        fbxName = os.path.join(dirPath, 's%s.fbx' % name)
+        cmds.FBXExport('-file', fbxName, '-s')
+        cmds.parent('shadow', world=True)
+
+        upTextures(name,dirPath)

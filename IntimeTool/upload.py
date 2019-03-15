@@ -33,19 +33,18 @@ def changeTime(allTime):
 
 
 def findSpecifiedFile(path, suffix=''):
-    '''
+    """
     查找指定文件
     :param path: 根目录
     :param suffix: 格式，默认是空
     :return: 文件地址列表
-    '''
+    """
     _file = []
     for root, dirs, fils in os.walk(path):
         for file in fils:
             if file.endswith(suffix):
                 _file.append(os.path.join(root, file))
     return _file
-
 
 def colseAlert():
     result = EC.alert_is_present()(driver)
