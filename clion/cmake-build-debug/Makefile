@@ -122,6 +122,33 @@ clion/fast:
 	$(MAKE) -f CMakeFiles\clion.dir\build.make CMakeFiles/clion.dir/build
 .PHONY : clion/fast
 
+Enemy.obj: Enemy.cpp.obj
+
+.PHONY : Enemy.obj
+
+# target to build an object file
+Enemy.cpp.obj:
+	$(MAKE) -f CMakeFiles\clion.dir\build.make CMakeFiles/clion.dir/Enemy.cpp.obj
+.PHONY : Enemy.cpp.obj
+
+Enemy.i: Enemy.cpp.i
+
+.PHONY : Enemy.i
+
+# target to preprocess a source file
+Enemy.cpp.i:
+	$(MAKE) -f CMakeFiles\clion.dir\build.make CMakeFiles/clion.dir/Enemy.cpp.i
+.PHONY : Enemy.cpp.i
+
+Enemy.s: Enemy.cpp.s
+
+.PHONY : Enemy.s
+
+# target to generate assembly for a file
+Enemy.cpp.s:
+	$(MAKE) -f CMakeFiles\clion.dir\build.make CMakeFiles/clion.dir/Enemy.cpp.s
+.PHONY : Enemy.cpp.s
+
 main.obj: main.cpp.obj
 
 .PHONY : main.obj
@@ -158,6 +185,9 @@ help:
 	@echo ... clion
 	@echo ... edit_cache
 	@echo ... rebuild_cache
+	@echo ... Enemy.obj
+	@echo ... Enemy.i
+	@echo ... Enemy.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s
