@@ -42,10 +42,10 @@ RM = "C:\Program Files\JetBrains\CLion 2018.3.4\bin\cmake\win\bin\cmake.exe" -E 
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = C:\Users\HYC\Documents\MyCode\clion
+CMAKE_SOURCE_DIR = C:\Users\Intime\Documents\MyCode\clion
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = C:\Users\HYC\Documents\MyCode\clion\cmake-build-debug
+CMAKE_BINARY_DIR = C:\Users\Intime\Documents\MyCode\clion\cmake-build-debug
 
 # Include any dependencies generated for this target.
 include CMakeFiles/clion.dir/depend.make
@@ -58,29 +58,29 @@ include CMakeFiles/clion.dir/flags.make
 
 CMakeFiles/clion.dir/main.cpp.obj: CMakeFiles/clion.dir/flags.make
 CMakeFiles/clion.dir/main.cpp.obj: ../main.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\HYC\Documents\MyCode\clion\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/clion.dir/main.cpp.obj"
-	C:\PROGRA~1\mingw64\bin\G__~1.EXE  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\clion.dir\main.cpp.obj -c C:\Users\HYC\Documents\MyCode\clion\main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\Intime\Documents\MyCode\clion\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/clion.dir/main.cpp.obj"
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\clion.dir\main.cpp.obj -c C:\Users\Intime\Documents\MyCode\clion\main.cpp
 
 CMakeFiles/clion.dir/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/clion.dir/main.cpp.i"
-	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\HYC\Documents\MyCode\clion\main.cpp > CMakeFiles\clion.dir\main.cpp.i
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\Intime\Documents\MyCode\clion\main.cpp > CMakeFiles\clion.dir\main.cpp.i
 
 CMakeFiles/clion.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/clion.dir/main.cpp.s"
-	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\HYC\Documents\MyCode\clion\main.cpp -o CMakeFiles\clion.dir\main.cpp.s
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\Intime\Documents\MyCode\clion\main.cpp -o CMakeFiles\clion.dir\main.cpp.s
 
 CMakeFiles/clion.dir/Enemy.cpp.obj: CMakeFiles/clion.dir/flags.make
 CMakeFiles/clion.dir/Enemy.cpp.obj: ../Enemy.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\HYC\Documents\MyCode\clion\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/clion.dir/Enemy.cpp.obj"
-	C:\PROGRA~1\mingw64\bin\G__~1.EXE  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\clion.dir\Enemy.cpp.obj -c C:\Users\HYC\Documents\MyCode\clion\Enemy.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=C:\Users\Intime\Documents\MyCode\clion\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/clion.dir/Enemy.cpp.obj"
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles\clion.dir\Enemy.cpp.obj -c C:\Users\Intime\Documents\MyCode\clion\Enemy.cpp
 
 CMakeFiles/clion.dir/Enemy.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/clion.dir/Enemy.cpp.i"
-	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\HYC\Documents\MyCode\clion\Enemy.cpp > CMakeFiles\clion.dir\Enemy.cpp.i
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\Users\Intime\Documents\MyCode\clion\Enemy.cpp > CMakeFiles\clion.dir\Enemy.cpp.i
 
 CMakeFiles/clion.dir/Enemy.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/clion.dir/Enemy.cpp.s"
-	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\HYC\Documents\MyCode\clion\Enemy.cpp -o CMakeFiles\clion.dir\Enemy.cpp.s
+	C:\PROGRA~1\mingw64\bin\G__~1.EXE $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\Users\Intime\Documents\MyCode\clion\Enemy.cpp -o CMakeFiles\clion.dir\Enemy.cpp.s
 
 # Object files for target clion
 clion_OBJECTS = \
@@ -96,7 +96,7 @@ clion.exe: CMakeFiles/clion.dir/build.make
 clion.exe: CMakeFiles/clion.dir/linklibs.rsp
 clion.exe: CMakeFiles/clion.dir/objects1.rsp
 clion.exe: CMakeFiles/clion.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\HYC\Documents\MyCode\clion\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable clion.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=C:\Users\Intime\Documents\MyCode\clion\cmake-build-debug\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable clion.exe"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\clion.dir\link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -109,6 +109,6 @@ CMakeFiles/clion.dir/clean:
 .PHONY : CMakeFiles/clion.dir/clean
 
 CMakeFiles/clion.dir/depend:
-	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" C:\Users\HYC\Documents\MyCode\clion C:\Users\HYC\Documents\MyCode\clion C:\Users\HYC\Documents\MyCode\clion\cmake-build-debug C:\Users\HYC\Documents\MyCode\clion\cmake-build-debug C:\Users\HYC\Documents\MyCode\clion\cmake-build-debug\CMakeFiles\clion.dir\DependInfo.cmake --color=$(COLOR)
+	$(CMAKE_COMMAND) -E cmake_depends "MinGW Makefiles" C:\Users\Intime\Documents\MyCode\clion C:\Users\Intime\Documents\MyCode\clion C:\Users\Intime\Documents\MyCode\clion\cmake-build-debug C:\Users\Intime\Documents\MyCode\clion\cmake-build-debug C:\Users\Intime\Documents\MyCode\clion\cmake-build-debug\CMakeFiles\clion.dir\DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/clion.dir/depend
 

@@ -48,9 +48,9 @@ void runCalculator() {
 int main() {
 
     int s = 324;
-    string s = "aaaasdfjkldsajfkl";
+    string a = "aaaasdfjkldsajfkl";
 
-
+    cout << a << endl;
 
     return 0;
 }

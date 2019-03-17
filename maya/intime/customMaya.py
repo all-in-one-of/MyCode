@@ -451,6 +451,11 @@ def createMetallicTex(name):
 
 
 def exportTo(name,simplygon=False,unity=False):
+
+    unityDirPath = createDirectory(os.path.join(UNITYPROJECTPATH, name))
+
+    cmds.select('s' + name)
+
     if simplygon:
 
         fbxName = os.path.join(r'F:\Share\simplygon\standby', '%s.fbx' % name)
@@ -458,24 +463,21 @@ def exportTo(name,simplygon=False,unity=False):
         cmds.FBXExport('-file', fbxName, '-s')
 
     elif unity:
-        name = 's'+name
-        dirPath = createDirectory(os.path.join(UNITYPROJECTPATH,name))
 
-        cmds.select(name)
 
         if cmds.objExists('shadow'):
             try:
-                cmds.parent('shadow', name)
+                cmds.parent('shadow', 's' + name)
             except:
-                cmds.warning(u'未找到',name)
+                cmds.warning(u'未找到','s' + name)
                 return
 
         else:
             cmds.warning(u'缺少软阴影')
             return
 
-        fbxName = os.path.join(dirPath, 's%s.fbx' % name)
+        fbxName = os.path.join(unityDirPath, 's%s.fbx' % name)
         cmds.FBXExport('-file', fbxName, '-s')
         cmds.parent('shadow', world=True)
 
-        upTextures(name,dirPath)
+        upTextures(name,unityDirPath)
