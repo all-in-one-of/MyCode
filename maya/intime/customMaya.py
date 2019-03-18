@@ -7,7 +7,7 @@ import os
 from pypinyin import lazy_pinyin
 from PIL import Image, ImageChops, ImageOps, ImageFilter
 import pymel.core as pm
-from maya import cmds
+from maya import cmds, mel
 
 
 def createDirectory(directory):
@@ -24,6 +24,7 @@ def createDirectory(directory):
 MAYAPROJECT = cmds.workspace(fn=True)
 SOURCEIMAGES = createDirectory(os.path.join(MAYAPROJECT, 'sourceimages'))
 UNITYPROJECTPATH = r'F:\Share\createAssetBundels\Assets\yingtaikeji'
+
 
 def findSpecifiedFile(path, suffix=''):
     '''
@@ -55,8 +56,6 @@ def baseNameForPath(path, suffix=True):
     else:
         name, b = os.path.splitext(name)
         return name
-
-
 
 
 def readJson(path):
@@ -91,6 +90,7 @@ def imageSaveAs(oPath, size, tPath=None, suffix=None):
 def importMeshFile(path):
     cmds.file(path, i=True, force=True)
     cmds.viewFit()
+    cmds.file(save=True)
 
 
 def newScene():
@@ -288,7 +288,6 @@ def createShadow(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
     :param direcotory: 文件夹，默认项目文件夹sourceimages
     '''
 
-
     if cmds.ls(sl=True, type='dagNode'):
         meshName = cmds.ls(sl=True, type='dagNode')[0]
         bbox = cmds.exactWorldBoundingBox(meshName)
@@ -297,7 +296,7 @@ def createShadow(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
             extend = 15
             shdowsX = (bbox[3] - bbox[0]) + extend
             shdowsZ = (bbox[5] - bbox[2]) + extend
-            panleName='shadow'
+            panleName = 'shadow'
 
             if cmds.objExists(panleName):
                 cmds.delete(panleName)
@@ -377,7 +376,7 @@ def saveScreenshot(name, directory=SOURCEIMAGES):
     return path
 
 
-def upTextures(name, directory,goodsImage=False):
+def upTextures(name, directory, goodsImage=False):
     textureDir = os.path.join(MAYAPROJECT, 'sourceimages')
 
     if goodsImage:
@@ -449,14 +448,8 @@ def createMetallicTex(name):
     im0.save(os.path.join(MAYAPROJECT, 'Diffuse.png'))
 
 
-
-def exportTo(name,simplygon=False,unity=False):
-
-    unityDirPath = createDirectory(os.path.join(UNITYPROJECTPATH, name))
-
-    cmds.select('s' + name)
-
-    if simplygon:
+def exportTo(name, simplyGon=False, unity=False):
+    if simplyGon:
 
         fbxName = os.path.join(r'F:\Share\simplygon\standby', '%s.fbx' % name)
         cmds.FBXExportEmbeddedTextures('-v', True)
@@ -464,20 +457,87 @@ def exportTo(name,simplygon=False,unity=False):
 
     elif unity:
 
+        unityDirPath = createDirectory(os.path.join(UNITYPROJECTPATH, name))
+        try:
+            cmds.select('s' + name)
+        except:
+            cmds.warning(u'未找到', 's' + name)
+            return
 
         if cmds.objExists('shadow'):
             try:
                 cmds.parent('shadow', 's' + name)
             except:
-                cmds.warning(u'未找到','s' + name)
+                cmds.warning(u'未知原因')
                 return
 
         else:
-            cmds.warning(u'缺少软阴影')
+            cmds.warning(u'缺少阴影')
             return
 
         fbxName = os.path.join(unityDirPath, 's%s.fbx' % name)
         cmds.FBXExport('-file', fbxName, '-s')
         cmds.parent('shadow', world=True)
 
-        upTextures(name,unityDirPath)
+        upTextures(name, unityDirPath)
+
+
+def importSimplyGon(name):
+    simplygonOutDir = r'F:\Share\simplygon\outputDir\lowPix'
+    fbxPath = os.path.join(simplygonOutDir, '%s/LOD1/%s_lowPix_LOD1.fbx' % (name, name))
+    ao = r"F:\Share\simplygon\outputDir\lowPix\%s\LOD1\Textures\AmbientOcclusion.png" % name
+    d = r"F:\Share\simplygon\outputDir\lowPix\%s\LOD1\Textures\Diffuse.png" % name
+    n = r"F:\Share\simplygon\outputDir\lowPix\%s\LOD1\Textures\Normals.png" % name
+
+    try:
+        shutil.copy(ao, MAYAPROJECT)
+        shutil.copy(d, MAYAPROJECT)
+        shutil.copy(n, MAYAPROJECT)
+        importMeshFile(fbxPath)
+
+    except:
+        cmds.warning('导入失败')
+        return
+
+
+def createNewScene(name):
+    newScene()
+    sceneDir = os.path.join(MAYAPROJECT, 'scenes')
+    sceneFile = os.path.join(sceneDir, name)
+    cmds.file(rename=sceneFile)
+    cmds.file(save=True, force=True, type='mayaAscii')
+
+
+for shape in cmds.ls(g=True):
+    bbox = cmds.exactWorldBoundingBox(shape)
+    if abs(bbox[4] - bbox[1]) <= 1:
+        cmds.delete(shape)
+
+
+def removeShadow():
+    try:
+        cmds.polySeparate(cmds.ls(g=1)[0], ch=0)
+    except:
+        pass
+
+    for shape in cmds.ls(g=True):
+        bbox = cmds.exactWorldBoundingBox(shape)
+        if abs(bbox[4] - bbox[1]) <= 1:
+            cmds.delete(cmds.listRelatives(shape, p=1)[0])
+        else:
+            for i in cmds.ls(assemblies=True):
+                g = cmds.listRelatives(i, type='transform')
+                if g:
+                    cmds.select(i)
+                    cmds.ungroup()
+                    try:
+                        cmds.sets(g, e=True, fe='initialShadingGroup')
+                    except:
+                        pass
+
+
+def deleteUnused():
+    try:
+        mel.eval('MLdeleteUnused')
+    except:
+        cmds.warning('未清理')
