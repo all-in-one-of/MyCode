@@ -7,6 +7,16 @@
 
 
 class Enemy {
+public:
+    Enemy();
+
+    int HP;
+    int Damage;
+
+    void Attack();
+
+    void TakeDamage();
+
 
 };
 
