@@ -27,6 +27,13 @@ SOURCEIMAGES = createDirectory(os.path.join(MAYAPROJECT, 'sourceimages'))
 UNITYPROJECTPATH = r'F:\Share\createAssetBundels\Assets\yingtaikeji'
 
 
+
+def writeJson(jsonPath, info):
+    with open(jsonPath, 'w') as f:
+        json.dump(info, f, ensure_ascii=False, indent=2)
+
+
+
 def changeTime(allTime):
     day = 24 * 60 * 60
     hour = 60 * 60
@@ -219,7 +226,7 @@ def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
             cmds.setAttr(roughness + '.fileTextureName', roughnessTex, type='string')
 
         else:
-            cmds.setAttr(shader + '.roughness', 0.3)
+            cmds.setAttr(shader + '.roughness', 0.5)
 
         if img.endswith('%s_m.png' % name):
             metallicTex = os.path.join(direcotory, img)
@@ -312,7 +319,7 @@ def createShadow(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
     if cmds.ls(sl=True, type='dagNode'):
         meshName = cmds.ls(sl=True, type='dagNode')[0]
         bbox = cmds.exactWorldBoundingBox(meshName)
-        if bbox[1] != 0:
+        if abs(bbox[1] - bbox[4]) != 0:
 
             extend = 15
             shdowsX = (bbox[3] - bbox[0]) + extend
@@ -487,18 +494,18 @@ def exportTo(name, simplyGon=False, unity=False):
             cmds.select('s' + name)
         except:
             cmds.warning(u'未找到', 's' + name)
-            return
+            return name
 
         if cmds.objExists('shadow'):
             try:
                 cmds.parent('shadow', 's' + name)
             except:
                 cmds.warning(u'未知原因')
-                return
+                return name
 
         else:
             cmds.warning(u'缺少阴影')
-            return
+            return name
 
         fbxName = os.path.join(unityDirPath, 's%s.fbx' % name)
         cmds.FBXExport('-file', fbxName, '-s')
@@ -641,20 +648,48 @@ def temp2():
     errorList = []
 
     for i in goodsList:
+
         maFile = os.path.join(scenesDir, i + '.ma')
         contrastSKU = rdxInfo[goodsList.index(i)][1]
 
         openMeshFile(maFile)
         mesh = cmds.listRelatives(cmds.ls(g=True)[0], p=True)[0]
         cmds.select(mesh)
-        cmds.rename('s'+i)
-        # createPBS(i)
-        # createShadow(i)
+        createPBS(i)
+        createShadow(i)
         deleteUnused()
+        e = exportTo(i, unity=True)
+        if e:
+            errorList.append(e)
+
         cmds.file(save=True)
 
         print i
 
-
-
     print changeTime(time.time() - startTime)
+    print errorList
+
+def toUnityPackage():
+    errorList = readJson(os.path.join(MAYAPROJECT,'errorList.json'))
+    scenesDir = os.path.join(MAYAPROJECT, 'scenes')
+
+    for i in errorList:
+        maFile = os.path.join(scenesDir, i + '.ma')
+        openMeshFile(maFile)
+
+        cmds.select('s'+i)
+
+        createPBS(i)
+        createShadow(i)
+        deleteUnused()
+        e = exportTo(i, unity=True)
+        if e is None:
+            errorList.remove(i)
+
+        cmds.file(save=True)
+        print i
+    writeJson(os.path.join(MAYAPROJECT, 'errorList.json'), errorList)
+    if errorList == []:
+        print u'修改完成'
+    else:
+        print errorList, u'需要修改'
