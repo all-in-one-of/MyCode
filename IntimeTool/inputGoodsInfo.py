@@ -291,21 +291,23 @@ def addSpecification(goodsSKU, specifications):
 
 
 if __name__ == '__main__':
-    # merchantName = '映泰科技'
-    # selectMerchant(merchantName)
-    # goodsInfo = {'inputPersonnel': '00',
-    #              'name': '测评（双洋 | 简悟 君子沙发-角几）',
-    #              'merchant': '映泰科技',
-    #              'classify': '其他',
-    #              'brand': '映像家居',
-    #              'series': '公共素材'}
-    # createSKU(fillGoodsInfo(goodsInfo))
+    merchantName = '荣鼎轩红木'
+    selectMerchant(merchantName)
+    names = readJson(r'C:\Users\Intime\Documents\MyCode\IntimeTool\rdx.json')
 
+    # for name in names:
+    #     goodsInfo = {'inputPersonnel': '00',
+    #                  'name': name[0],
+    #                  'merchant': merchantName,
+    #                  'classify': '其他',
+    #                  'brand': '荣鼎轩',
+    #                  'series': '其他'}
+    #     createSKU(fillGoodsInfo(goodsInfo))
 
-    merchantInfo = readJson(r'F:\Share\goods\yingtaikeji\yingtaikeji.json')
-    merchantPath = r'F:\Share\goods\yingtaikeji'
-    for i in merchantInfo['goodsList']:
-        jsonPath = os.path.join(merchantPath,'%s/%s.json' %(i,i))
-        goodsInfo = readJson(jsonPath)
-        goodsInfo['name']=merchantInfo['contrast'][i]
-        writeJson(jsonPath,goodsInfo)
+    # merchantInfo = readJson(r'F:\Share\goods\yingtaikeji\yingtaikeji.json')
+    # merchantPath = r'F:\Share\goods\yingtaikeji'
+    # for i in merchantInfo['goodsList']:
+    #     jsonPath = os.path.join(merchantPath,'%s/%s.json' %(i,i))
+    #     goodsInfo = readJson(jsonPath)
+    #     goodsInfo['name']=merchantInfo['contrast'][i]
+    #     writeJson(jsonPath,goodsInfo)
