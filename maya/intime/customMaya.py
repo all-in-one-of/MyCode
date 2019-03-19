@@ -1,6 +1,7 @@
 # coding=utf-8
 import shutil
-
+import time
+import math
 import cv2
 import json
 import os
@@ -24,6 +25,23 @@ def createDirectory(directory):
 MAYAPROJECT = cmds.workspace(fn=True)
 SOURCEIMAGES = createDirectory(os.path.join(MAYAPROJECT, 'sourceimages'))
 UNITYPROJECTPATH = r'F:\Share\createAssetBundels\Assets\yingtaikeji'
+
+
+def changeTime(allTime):
+    day = 24 * 60 * 60
+    hour = 60 * 60
+    min = 60
+    if allTime < 60:
+        return "%d sec" % math.ceil(allTime)
+    elif allTime > day:
+        days = divmod(allTime, day)
+        return "%d days, %s" % (int(days[0]), changeTime(days[1]))
+    elif allTime > hour:
+        hours = divmod(allTime, hour)
+        return '%d hours, %s' % (int(hours[0]), changeTime(hours[1]))
+    else:
+        mins = divmod(allTime, min)
+        return "%d mins, %d sec" % (int(mins[0]), math.ceil(mins[1]))
 
 
 def findSpecifiedFile(path, suffix=''):
@@ -145,7 +163,10 @@ def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
     shader = cmds.shadingNode('StingrayPBS', asShader=True, name=shaderName)
     cmds.shaderfx(sfxnode=shader, initShaderAttributes=True)  # 初始化pbs
 
-    shading_group = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=shaderName + 'SG')
+    shading_group_name = shaderName + 'SG'
+    if cmds.objExists(shading_group_name):
+        cmds.delete(shading_group_name)
+    shading_group = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=shading_group_name)
     cmds.connectAttr(shader + '.outColor', shading_group + '.surfaceShader')
 
     imges = os.listdir(direcotory)
@@ -163,7 +184,7 @@ def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
 
         if img.endswith('%s_n.png' % name):
             noramlTex = os.path.join(direcotory, img)
-            imageSaveAs(baseTex, (2048, 2048))
+            imageSaveAs(noramlTex, (2048, 2048))
 
             tn = 'T_' + name + '_n'
             if cmds.objExists(tn):
@@ -314,7 +335,11 @@ def createShadow(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
         if cmds.objExists(shaderName):
             cmds.delete(shaderName)
         shader = cmds.shadingNode('lambert', asShader=True, name=shaderName)
-        shading_group = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=shaderName + 'SG')
+
+        shading_group_name = shaderName + 'SG'
+        if cmds.objExists(shading_group_name):
+            cmds.delete(shading_group_name)
+        shading_group = cmds.sets(renderable=True, noSurfaceShader=True, empty=True, name=shading_group_name)
         cmds.connectAttr(shader + '.outColor', shading_group + '.surfaceShader')
         shadowTex = os.path.join(direcotory, 'T_%s_s.png' % name)
         shadowName = 'T_' + name + '_s'
@@ -508,12 +533,6 @@ def createNewScene(name):
     cmds.file(save=True, force=True, type='mayaAscii')
 
 
-for shape in cmds.ls(g=True):
-    bbox = cmds.exactWorldBoundingBox(shape)
-    if abs(bbox[4] - bbox[1]) <= 1:
-        cmds.delete(shape)
-
-
 def removeShadow():
     try:
         cmds.polySeparate(cmds.ls(g=1)[0], ch=0)
@@ -541,3 +560,101 @@ def deleteUnused():
         mel.eval('MLdeleteUnused')
     except:
         cmds.warning('未清理')
+
+
+def temp1():
+    startTime = time.time()
+    goodsInfo = readJson(r"F:\Share\goods\rongdingxuanhongmu\rongdingxuanhongmu.json")
+    rdxDir = r'F:\Share\2018\rdx'
+    rdxInfo = readJson(r"F:\Share\goods\rongdingxuanhongmu\rdx.json")
+
+    goodsList = goodsInfo['goodsList']
+
+    scenesDir = os.path.join(MAYAPROJECT, 'scenes')
+    sourceImagesDir = os.path.join(MAYAPROJECT, 'sourceimages')
+    texturesDir = os.path.join(MAYAPROJECT, 'Textures')
+    errorList = []
+
+    for i in goodsList:
+
+        maFile = os.path.join(scenesDir, i + '.ma')
+        contrastSKU = rdxInfo[goodsList.index(i)][1]
+
+        contrastDir = os.path.join(rdxDir, contrastSKU)
+        print contrastDir
+        images = findSpecifiedFile(contrastDir, 'png')
+        goodsImage = findSpecifiedFile(contrastDir, '.jpg')[0]
+
+        shutil.copyfile(goodsImage, os.path.join(texturesDir, i + '.jpg'))
+
+        for img in images:
+            if img.endswith('_s.png'):
+                shadowTex = img
+                shutil.copyfile(shadowTex, os.path.join(sourceImagesDir, 'T_%s_s.png' % i))
+            elif img.endswith('AmbientOcclusion.png') or img.endswith('ao.png'):
+                aoTex = img
+                shutil.copyfile(aoTex, os.path.join(sourceImagesDir, 'T_%s_ao.png' % i))
+
+            elif img.endswith('Diffuse.png') or img.endswith('b.png'):
+                diffuseTex = img
+                shutil.copyfile(diffuseTex, os.path.join(sourceImagesDir, 'T_%s_b.png' % i))
+
+            elif img.endswith('Normals.png') or img.endswith('n.png'):
+                normalTex = img
+                shutil.copyfile(normalTex, os.path.join(sourceImagesDir, 'T_%s_n.png' % i))
+
+            elif img.endswith('m.png') or img.endswith('m.png'):
+                metallicTex = img
+                shutil.copyfile(metallicTex, os.path.join(sourceImagesDir, 'T_%s_m.png' % i))
+            elif img.endswith('r.png'):
+                roughnessTex = img
+                shutil.copyfile(roughnessTex, os.path.join(sourceImagesDir, 'T_%s_r.png' % i))
+
+        try:
+            openMeshFile(maFile)
+            cmds.select(cmds.ls(g=True))
+            createPBS(i)
+            createShadow(i)
+            deleteUnused()
+            cmds.file(save=True)
+
+        except:
+            errorList.append(contrastSKU)
+
+        print i
+
+    print errorList
+    print changeTime(time.time() - startTime)
+
+
+def temp2():
+    startTime = time.time()
+    goodsInfo = readJson(r"F:\Share\goods\rongdingxuanhongmu\rongdingxuanhongmu.json")
+    rdxDir = r'F:\Share\2018\rdx'
+    rdxInfo = readJson(r"F:\Share\goods\rongdingxuanhongmu\rdx.json")
+
+    goodsList = goodsInfo['goodsList']
+
+    scenesDir = os.path.join(MAYAPROJECT, 'scenes')
+    sourceImagesDir = os.path.join(MAYAPROJECT, 'sourceimages')
+    texturesDir = os.path.join(MAYAPROJECT, 'Textures')
+    errorList = []
+
+    for i in goodsList:
+        maFile = os.path.join(scenesDir, i + '.ma')
+        contrastSKU = rdxInfo[goodsList.index(i)][1]
+
+        openMeshFile(maFile)
+        mesh = cmds.listRelatives(cmds.ls(g=True)[0], p=True)[0]
+        cmds.select(mesh)
+        cmds.rename('s'+i)
+        # createPBS(i)
+        # createShadow(i)
+        deleteUnused()
+        cmds.file(save=True)
+
+        print i
+
+
+
+    print changeTime(time.time() - startTime)
