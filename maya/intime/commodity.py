@@ -14,6 +14,7 @@ import logging
 import Qt
 
 TempPath = os.path.join(os.environ['TEMP'], 'inTimeLibrary')
+
 customMaya.createDirectory(TempPath)
 # 初始化logging系统
 logging.basicConfig()
@@ -403,7 +404,6 @@ class commodityLibraryUI(QtWidgets.QWidget):
         self.setMinimumWidth(370)
         self.createWidgets()
         self.createLayouts()
-        cc = r'C:\Users\Intime\Documents\MyCode\maya\intime'
         self.initCommodityInfo(RDX)
         self.flitCommodity(self.radioBtn0)
         self.lineEditCompleter()
@@ -508,17 +508,20 @@ class commodityLibraryUI(QtWidgets.QWidget):
 
             cacheImage = os.path.join(TempPath, os.path.basename(originalCommodityImage))
             imageSize = (64, 64)
+            print commodityOriginalSKU
+
             if os.path.exists(cacheImage) is False:
-                try:
-                    customMaya.imageSaveAs(originalCommodityImage,
-                                           cacheImage,
-                                           imageSize)
-                    self.commodityIcon[commodityOriginalSKU] = cacheImage
-                except:
-                    customMaya.imageSaveAs(ImageLose,
-                                           cacheImage,
-                                           imageSize)
-                    self.commodityIcon[commodityOriginalSKU] = cacheImage
+                # try:
+                customMaya.imageSaveAs(originalCommodityImage,
+                                       imageSize,
+                                       cacheImage)
+                self.commodityIcon[commodityOriginalSKU] = cacheImage
+                # except:
+                #     print 'b'
+                #     # customMaya.imageSaveAs(ImageLose,
+                #     #                        cacheImage,
+                #     #                        imageSize)
+                #     self.commodityIcon[commodityOriginalSKU] = ImageLose
 
             else:
                 # try:
@@ -531,9 +534,10 @@ class commodityLibraryUI(QtWidgets.QWidget):
                 #                            cacheImage,
                 #                            (50, 50))
                 self.commodityIcon[commodityOriginalSKU] = cacheImage
+            break
+
         self.commodityInfoList = self.commodityNames
 
-        # break
 
     def readCommodity(self, sku):
         # 自定义组件
@@ -543,6 +547,7 @@ class commodityLibraryUI(QtWidgets.QWidget):
 
         # 创建列表组件
         myQListWidgetItem = QtWidgets.QListWidgetItem(self.commodityList)
+        print self.commodityIcon
 
         commodityPhoto = self.commodityIcon[sku]
         self.myQCustomQWidget.setIcon(commodityPhoto)
@@ -624,10 +629,10 @@ class commodityLibraryUI(QtWidgets.QWidget):
         self.commodityNmuber.setText('总计：%s/%s' % (str(num), len(self.commoditySKU)))
 
     # 监听窗口事件
-    def resizeEvent(self, event):
-        self.refreshCommodityList(self.commodityInfoList)
-        # print self.width()
-        # QtWidgets.QWidget.resizeEvent(self, event)
+    # def resizeEvent(self, event):
+    #     self.refreshCommodityList(self.commodityInfoList)
+    #     # print self.width()
+    #     # QtWidgets.QWidget.resizeEvent(self, event)
 
     def setNameText(self, width, text):
 
