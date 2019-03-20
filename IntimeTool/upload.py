@@ -46,6 +46,7 @@ def findSpecifiedFile(path, suffix=''):
                 _file.append(os.path.join(root, file))
     return _file
 
+
 def colseAlert():
     result = EC.alert_is_present()(driver)
     while result is False:
@@ -94,11 +95,6 @@ class InTimeWebUpload():
         login_button = driver.find_element_by_css_selector(
             '#loginform > form > div:nth-child(3) > div > input.btn.btn-success.radius.size-L')  # 登陆
         login_button.click()
-        b = driver.find_elements_by_xpath('//*[@id="menu-article"]/dt/i[2]')  # 商品管理选单
-        b[1].click()
-        c = driver.find_elements_by_xpath('//*[@id="menu-article"]/dd/ul/li[1]/a')  # 商品管理
-
-        c[1].click()
 
     def initGoodsInfo(self, goodsInfo):
         self.name = goodsInfo['name']
@@ -112,13 +108,14 @@ class InTimeWebUpload():
         self.merchantSKU = goodsInfo['merchantSKU']
         self.craft = goodsInfo['craft']
         self.material = goodsInfo['material']
-        self.size = goodsInfo['size']
+        self.size = tuple(goodsInfo['size'])
         self.style = goodsInfo['style']
         self.price = goodsInfo['price']
         self.sku = goodsInfo['sku']
         self.skinMD5 = goodsInfo['skinMD5']
         self.skinPackage = goodsInfo['skinPackage']
         self.specifications = goodsInfo['specifications']
+        self.sort = goodsInfo['sort']
 
     def add_commodity(self):
         driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[1])  # 选择商品管理frame
@@ -130,7 +127,6 @@ class InTimeWebUpload():
         self.upload_commodity()
 
     def revise_commodity(self):
-
         driver.switch_to.frame(driver.find_elements_by_tag_name("iframe")[1])  # 选择商品管理frame
         search_name = driver.find_element_by_name('name')  # 按商品名查找
         search_name.clear()
@@ -144,107 +140,34 @@ class InTimeWebUpload():
         self.upSkinPackage()
         self.submit()
 
-
     def upload_commodity(self):
-        up_file = []
-        up_image = []
+        '''
+        上传商品
+        :return:
+        '''
+        self.upSubheading()
+        self.selectClassify()
+        self.selectMerchant()
+        self.selectBrand()
+        self.selectSeries()
+        self.upMerchantSKU()
+        self.upCraft()
+        self.upMaterial()
+        self.upSize()
+        self.upStyle()
+        self.upPrice()
+        self.upMD5()
+        self.upGoodsImage()
+        self.upSkinPackage()
+        self.up_option()
+        self.putaway()
+        self.upSort()
+        self.submit()
 
-        name = driver.find_element_by_id('name')  # 名称
-        name.clear()
-        name.send_keys(self.name)
-
-        subname = driver.find_element_by_id('subname')  # 副标题
-        subname.clear()
-        subname.send_keys(self.subheading)
-
-        parent_id = driver.find_element_by_name('parent_id')  # 选择分类
-        time.sleep(0.1)
-        Select(parent_id).select_by_visible_text(self.classify)
-
-        seller_id = driver.find_element_by_name('seller_id')  # 选择商家
-        time.sleep(0.1)
-        Select(seller_id).select_by_visible_text(self.merchant)
-
-        brand_id = driver.find_element_by_name('brand_id')  # 选择品牌
-        time.sleep(0.1)
-        Select(brand_id).select_by_visible_text(self.brand)
-
-        set_id = driver.find_element_by_name('set_id')  # 选择系列
-        time.sleep(0.1)
-        Select(set_id).select_by_visible_text(self.series)
-
-        sku = driver.find_element_by_name('sku')  # 货号
-        sku.clear()
-        sku.send_keys(self.sku)
-
-        seller_sku = driver.find_element_by_id("seller_sku")  # 商家sku
-        seller_sku.clear()
-        seller_sku.send_keys(self.merchantSKU)
-
-        tech = driver.find_element_by_name('tech')  # 工艺
-        tech.clear()
-        tech.send_keys(self.craft)
-
-        material = driver.find_element_by_name('material')  # 材质
-        material.clear()
-        material.send_keys(self.material)
-
-        volume = driver.find_element_by_name('volume')  # 体积
-        volume.clear()
-        volume.send_keys('长: %scm  宽: %scm  高: %scm' % (self.size[0],
-                                                        self.size[2],
-                                                        self.size[1]))
-
-        style = driver.find_element_by_name('style')  # 风格
-        style.clear()
-        style.send_keys(self.style)
-
-        price = driver.find_element_by_name('price')  # 价格
-        price.clear()
-        price.send_keys(self.price)
-
-        md5 = driver.find_element_by_name('md5')  # MD5
-        md5.clear()
-        md5.send_keys(self.skinMD5)
-
-        up_image = driver.find_element_by_name('image_path')  # 图片文件
-
-        up_image.send_keys(self.goodsImage)
-
-        up_image_button = driver.find_element_by_name('upload_image')  # 图片上传按钮
-
-        up_image_button.click()
-        colseAlert()
-
-        skin_file = driver.find_element_by_name('skin_file')  # 皮肤包文件
-        skin_file.send_keys(self.skinPackage)
-
-        skin_file_button = driver.find_element_by_name('upload_model')  # 上传皮肤包按钮
-
-        skin_file_button.click()
-        colseAlert()
-
-        self.up_option(self.specifications)
-
-        # status1 = driver.find_element_by_css_selector(
-        #     '#form-add-edit > div:nth-child(21) > div.formControls.col-5.skin-minimal > div:nth-child(1) > div')  # 上架
-        # status0 = driver.find_element_by_xpath('//*[@id="form-add-edit"]/div[21]/div[1]/div[2]/label')  # 下架
-        #
-        # position = driver.find_element_by_id('position')  # 排序
-        # position.clear()
-        # position.send_keys(commodity_info['排序'])
-
-        submit = driver.find_element_by_css_selector('#form-add-edit > div:nth-child(23) > div > input')  # 提交
-        print(self.sku,self.name)
-
-        submit.click()
-
-        time.sleep(4)
-
-    def up_option(self, specifications):
+    def up_option(self):
         add = driver.find_element_by_name('add')  # 添加规格
         i = 0
-        for specification in specifications:
+        for specification in self.specifications:
             add.click()
 
             option_name = driver.find_elements_by_id('option_name')[i]  # 规格名称
@@ -276,6 +199,10 @@ class InTimeWebUpload():
             i += 1
 
     def upSkinPackage(self):
+        '''
+        上传皮肤包
+        :return:
+        '''
         skin_file = driver.find_element_by_name('skin_file')  # 皮肤包文件
         skin_file.send_keys(self.skinPackage)
 
@@ -285,12 +212,188 @@ class InTimeWebUpload():
         colseAlert()
 
     def submit(self):
+        '''
+        上传提交
+        :return:
+        '''
         submit = driver.find_element_by_css_selector('#form-add-edit > div:nth-child(23) > div > input')  # 提交
-        print(self.sku,self.name)
+        print(self.sku, self.name)
 
         submit.click()
 
         time.sleep(4)
+
+    def upGoodsImage(self):
+        '''
+        上传商品图片
+        :return:
+        '''
+
+        up_image = driver.find_element_by_name('image_path')  # 图片文件
+
+        up_image.send_keys(self.goodsImage)
+
+        up_image_button = driver.find_element_by_name('upload_image')  # 图片上传按钮
+
+        up_image_button.click()
+        colseAlert()
+
+    def upMD5(self):
+        '''
+        上传MD5码
+        :return:
+        '''
+        md5 = driver.find_element_by_name('md5')  # MD5
+        md5.clear()
+        md5.send_keys(self.skinMD5)
+
+    def upPrice(self):
+        '''
+        上传价格
+        :return:
+        '''
+        price = driver.find_element_by_name('price')  # 价格
+        price.clear()
+        price.send_keys(self.price)
+
+    def upStyle(self):
+        '''
+        上传风格
+        :return:
+        '''
+        style = driver.find_element_by_name('style')  # 风格
+        style.clear()
+        style.send_keys(self.style)
+
+    def upSize(self):
+        '''
+        上传体积
+        :return:
+        '''
+
+        volume = driver.find_element_by_name('volume')  # 体积
+        volume.clear()
+        volume.send_keys('长: %scm  宽: %scm  高: %scm' % self.size)
+
+    def upMaterial(self):
+        '''
+        上传材质
+        :return:
+        '''
+        material = driver.find_element_by_name('material')  # 材质
+        material.clear()
+        material.send_keys(self.material)
+
+    def upCraft(self):
+        '''
+        上传工艺
+        :return:
+        '''
+        tech = driver.find_element_by_name('tech')  # 工艺
+        tech.clear()
+        tech.send_keys(self.craft)
+
+    def upMerchantSKU(self):
+        '''
+        上传商家sku
+        :return:
+        '''
+        seller_sku = driver.find_element_by_id("seller_sku")  # 商家sku
+        seller_sku.clear()
+        seller_sku.send_keys(self.merchantSKU)
+
+    def upSKU(self):
+        '''
+        上传货号
+        :return:
+        '''
+        sku = driver.find_element_by_name('sku')  # 货号
+        sku.clear()
+        sku.send_keys(self.sku)
+
+    def selectSeries(self):
+        '''
+        选择系列
+        :return:
+        '''
+        set_id = driver.find_element_by_name('set_id')  # 选择系列
+        time.sleep(0.1)
+        Select(set_id).select_by_visible_text(self.series)
+
+    def selectBrand(self):
+        '''
+        选择品牌
+        :return:
+        '''
+        brand_id = driver.find_element_by_name('brand_id')  # 选择品牌
+        time.sleep(0.1)
+        Select(brand_id).select_by_visible_text(self.brand)
+
+    def selectMerchant(self):
+        '''
+        选择商家
+        :return:
+        '''
+        seller_id = driver.find_element_by_name('seller_id')  # 选择商家
+        time.sleep(0.1)
+        Select(seller_id).select_by_visible_text(self.merchant)
+
+    def selectClassify(self):
+        '''
+        选择分类
+        :return:
+        '''
+        parent_id = driver.find_element_by_name('parent_id')  # 选择分类
+        time.sleep(0.1)
+        Select(parent_id).select_by_visible_text(self.classify)
+
+    def upSubheading(self):
+        '''
+        上传副标题
+        :return:
+        '''
+        subname = driver.find_element_by_id('subname')  # 副标题
+        subname.clear()
+        subname.send_keys(self.subheading)
+
+    def upName(self):
+        '''
+        上传名称
+        :return:
+        '''
+        name = driver.find_element_by_id('name')  # 名称
+        name.clear()
+        name.send_keys(self.name)
+
+    def goodsManage(self):
+        '''
+        商品管理
+        :return:
+        '''
+        b = driver.find_elements_by_xpath('//*[@id="menu-article"]/dt/i[2]')  # 商品管理选单
+        b[1].click()
+
+        c = driver.find_elements_by_xpath('//*[@id="menu-article"]/dd/ul/li[1]/a')  # 商品管理
+        c[1].click()
+
+    def upSort(self):
+        '''
+        上传排序
+        :return:
+        '''
+        position = driver.find_element_by_id('position')  # 排序
+        position.clear()
+        position.send_keys(self.sort)
+
+    def putaway(self, putaway=True):
+        if putaway:
+            status1 = driver.find_element_by_css_selector(
+                '#form-add-edit > div:nth-child(21) > div.formControls.col-5.skin-minimal > div:nth-child(1) > div')  # 上架
+            status1.click()
+
+        else:
+            status0 = driver.find_element_by_xpath('//*[@id="form-add-edit"]/div[21]/div[1]/div[2]/label')  # 下架
+            status0.click()
 
 
 # 方法主入口
@@ -313,6 +416,4 @@ if __name__ == '__main__':
         it.revise_commodity()
     end = time.time()
     print(changeTime(end - start))
-    # modification(driver)
 
-    # print(commodity_info['finally']['渲染图片地址'].replace('//','\\'))
