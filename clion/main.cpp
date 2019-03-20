@@ -2,22 +2,19 @@
 #include <string>
 #include <cmath>
 #include "Enemy.h"
+#include "Enemy_walk.h"
 
 using namespace std;
 
 
 int main() {
 
-<<<<<<< HEAD
     Enemy enemy1;
-
+    Enemy_walk enemyWalk;
     cout << enemy1.HP << endl;
-=======
-    int s = 324;
-    string a = "°¡";
->>>>>>> master
 
-    cout << a << endl;
+    enemyWalk.TakeDamage();
+    cout << enemyWalk.HP << endl;
 
     return 0;
 }

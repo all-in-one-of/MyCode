@@ -3,4 +3,4 @@ project(clion)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(clion main.cpp Enemy.cpp Enemy.h)
+add_executable(clion main.cpp Enemy.cpp Enemy.h Enemy_walk.cpp Enemy_walk.h)
