@@ -116,6 +116,7 @@ def printMacAddress():
     print(macs)
     return macs
 
+
 def getMd5(file):
     myhash = hashlib.md5()
     with open(file, 'rb')as f:

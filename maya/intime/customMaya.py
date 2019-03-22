@@ -25,7 +25,9 @@ def createDirectory(directory):
 MAYAPROJECT = cmds.workspace(fn=True)
 SOURCEIMAGES = createDirectory(os.path.join(MAYAPROJECT, 'sourceimages'))
 UNITYPROJECTPATH = r'F:\Share\createAssetBundels\Assets\yingtaikeji'
-
+UnityJson = os.path.join(UNITYPROJECTPATH,'unity.json')
+SimplyGonDirectory = r'F:\Share\simplygon'
+SimplyGonJson = os.path.join(SimplyGonDirectory,'simplygon.json')
 
 
 def writeJson(jsonPath, info):
@@ -480,15 +482,17 @@ def createMetallicTex(name):
     im0.save(os.path.join(MAYAPROJECT, 'Diffuse.png'))
 
 
-def exportTo(name, simplyGon=False, unity=False):
-    if simplyGon:
-
+def exportTo(name, simplygon=False, unity=False):
+    if simplygon:
+        simplygonInfo = readJson(SimplyGonJson)
+        simplygonInfo['Execute'].append(name)
         fbxName = os.path.join(r'F:\Share\simplygon\standby', '%s.fbx' % name)
         cmds.FBXExportEmbeddedTextures('-v', True)
         cmds.FBXExport('-file', fbxName, '-s')
+        writeJson(SimplyGonJson,simplygonInfo)
 
     elif unity:
-
+        unityInfo = readJson(UnityJson)
         unityDirPath = createDirectory(os.path.join(UNITYPROJECTPATH, name))
         try:
             cmds.select('s' + name)
@@ -512,6 +516,8 @@ def exportTo(name, simplyGon=False, unity=False):
         cmds.parent('shadow', world=True)
 
         upTextures(name, unityDirPath)
+        unityInfo['Execute'].append(name)
+        writeJson(UnityJson,unityInfo)
 
 
 def importSimplyGon(name):
