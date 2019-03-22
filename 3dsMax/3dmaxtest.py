@@ -1,11 +1,13 @@
 import os
-
 import MaxPlus
+import thread
 
-maxFile=r"F:\Share\HSM\1分类\餐桌"
+maxFileDirectory = r"F:\Share\原始模型\融鼎轩"
 objfile = r'D:\aaaa'
 
 fm = MaxPlus.FileManager
+
+
 
 
 def findSpecifiedFile(path, suffix=''):
@@ -24,14 +26,11 @@ def findSpecifiedFile(path, suffix=''):
     return _file
 
 
+def exportObj():
+    for i in findSpecifiedFile(maxFileDirectory, suffix='.max'):
+        print(i)
+        fm.Open(i)
+        fm.Export(os.path.join(objfile, os.path.basename(i).replace('max', 'obj')), True)
 
 
-
-q = 1
-for i in findSpecifiedFile(maxFile,suffix='.max'):
-
-    print(i)
-    fm.Open(i)
-    fm.Export(os.path.join(objfile,'a%s.obj'% q),True)
-    q+=1
-
+exportObj()
