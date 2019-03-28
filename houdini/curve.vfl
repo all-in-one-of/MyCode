@@ -1,0 +1,49 @@
+int num = chi('num');
+
+float r = 1;
+float phi = 0;
+float rot = 6.28/num;
+
+vector pos =(0,0,0);
+
+int prim = addprim(0, 'polyline');
+
+
+// 等角
+for (int i = 0; i < num; ++i){
+    
+    r = chf('a')*pow($E, chf('b')*phi);
+
+    
+    pos.x = r * cos(phi);
+    pos.y = r * sin(phi);
+
+    int pt = addpoint(0, pos);
+
+    phi += rot*chf('anmi');
+
+    int vtx = addvertex(0, prim, pt);
+
+}
+
+// 蝴蝶
+for (float n = 0; n < chf('length'); n += chf('distance')){
+    
+
+
+    for (int i = 0; i < num; ++i){
+        
+        r = pow($E, cos(phi)) - 2*cos(chi('c1')*phi) + pow(sin(phi / 12), 5);
+
+        
+        pos.x = r * cos(phi);
+        pos.y = r * sin(phi);
+
+        int pt = addpoint(0, pos);
+
+        phi += rot*chf('anmi');
+
+        int vtx = addvertex(0, prim, pt);
+
+    }
+}
