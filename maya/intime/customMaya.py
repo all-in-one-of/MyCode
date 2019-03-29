@@ -9,7 +9,7 @@ from pypinyin import lazy_pinyin
 from PIL import Image, ImageChops, ImageOps, ImageFilter
 import pymel.core as pm
 from maya import cmds, mel
-
+import maya.OpenMaya as om
 
 def createDirectory(directory):
     '''
@@ -22,18 +22,41 @@ def createDirectory(directory):
     return directory
 
 
-MAYAPROJECT = cmds.workspace(fn=True)
-SOURCEIMAGES = createDirectory(os.path.join(MAYAPROJECT, 'sourceimages'))
-UNITYPROJECTPATH = r'F:\Share\createAssetBundels\Assets\yingtaikeji'
-UnityJson = os.path.join(UNITYPROJECTPATH,'unity.json')
+def readJson(path):
+    """
+    读取json
+    :param path: json文件
+    :return: 字典
+    """
+    with open(path, 'r') as f:
+        _info = json.load(f)  # 导入json文件
+        # b = json.dumps(info, encoding="utf-8", ensure_ascii=False)  # 转码成字符串
+        # c = eval(b)  # 转回字典
+    return _info  # 返回字典
+
+
+MayaProjectDir = cmds.workspace(fn=True)
+MayaJson = os.path.join(MayaProjectDir, 'Maya.json')
+MayaInfo = readJson(MayaJson)
+
+SourceImages = createDirectory(os.path.join(MayaProjectDir, 'sourceimages'))
+ScenesDir = createDirectory(os.path.join(MayaProjectDir, 'scenes'))
+TexturesDir = createDirectory(os.path.join(MayaProjectDir, 'Textures'))
+
+UnityProjectDir = r'F:\Share\createAssetBundels\Assets\yingtaikeji'
+UnityJson = os.path.join(UnityProjectDir, 'unity.json')
+
 SimplyGonDirectory = r'F:\Share\simplygon'
-SimplyGonJson = os.path.join(SimplyGonDirectory,'simplygon.json')
+SimplyGonJson = os.path.join(SimplyGonDirectory, 'simplygon.json')
+
+MarmosetDir = r'F:\Share\Marmoset'
+MarmosetJson = os.path.join(MarmosetDir, 'Marmoset.json')
+MarmosetInfo = readJson(MarmosetJson)
 
 
 def writeJson(jsonPath, info):
     with open(jsonPath, 'w') as f:
         json.dump(info, f, ensure_ascii=False, indent=2)
-
 
 
 def changeTime(allTime):
@@ -85,19 +108,6 @@ def baseNameForPath(path, suffix=True):
         return name
 
 
-def readJson(path):
-    """
-    读取json
-    :param path: json文件
-    :return: 字典
-    """
-    with open(path, 'r') as f:
-        _info = json.load(f)  # 导入json文件
-        # b = json.dumps(info, encoding="utf-8", ensure_ascii=False)  # 转码成字符串
-        # c = eval(b)  # 转回字典
-    return _info  # 返回字典
-
-
 def chineseSort(chinese):
     chinese.sort(key=lambda char: lazy_pinyin(char)[0][0])
 
@@ -133,7 +143,7 @@ def fitView(f=1):
     cmds.viewFit(f=f)
 
 
-def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
+def createPBS(name, direcotory=os.path.join(MayaProjectDir, 'sourceimages')):
     '''
     创建pbs
     :param name: 名字
@@ -145,26 +155,26 @@ def createPBS(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
     else:
         cmds.warning(u'未选择模型')
         return
-    for i in os.listdir(MAYAPROJECT):
+    for i in os.listdir(MayaProjectDir):
         # 使用simplygon减面
         if i.endswith('AmbientOcclusion.png'):
-            im = Image.open(os.path.join(MAYAPROJECT, i))
+            im = Image.open(os.path.join(MayaProjectDir, i))
             im = im.resize((512, 512), Image.ANTIALIAS)
             im.save(os.path.join(direcotory, 'T_%s_ao.png' % name))
-            os.remove(os.path.join(MAYAPROJECT, i))
+            os.remove(os.path.join(MayaProjectDir, i))
         if i.endswith('Diffuse.png'):
-            im = Image.open(os.path.join(MAYAPROJECT, i))
+            im = Image.open(os.path.join(MayaProjectDir, i))
             im = im.resize((2048, 2048), Image.ANTIALIAS)
             im.save(os.path.join(direcotory, 'T_%s_b.png' % name))
 
-            os.remove(os.path.join(MAYAPROJECT, i))
+            os.remove(os.path.join(MayaProjectDir, i))
 
         if i.endswith('Normals.png'):
-            im = Image.open(os.path.join(MAYAPROJECT, i))
+            im = Image.open(os.path.join(MayaProjectDir, i))
             im = im.resize((2048, 2048), Image.ANTIALIAS)
             im.save(os.path.join(direcotory, 'T_%s_n.png' % name))
 
-            os.remove(os.path.join(MAYAPROJECT, i))
+            os.remove(os.path.join(MayaProjectDir, i))
 
     shaderName = 'M_' + name + '_w'
     if cmds.objExists(shaderName):
@@ -311,7 +321,7 @@ def initializeTurtle():
     # cmds.connectAttr(mesh + ".instObjGroups[0]", tBakeLayer + ".dagSetMembers[0]")
 
 
-def createShadow(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
+def createShadow(name, direcotory=os.path.join(MayaProjectDir, 'sourceimages')):
     '''
     创建阴影材质球
     :param name: 名字
@@ -374,12 +384,12 @@ def createShadow(name, direcotory=os.path.join(MAYAPROJECT, 'sourceimages')):
         cmds.setAttr('%s.enableAdaptiveSampling' % sShader, 0)
         shapes = cmds.listRelatives(meshName, s=True)[0]
         bakeAO = 'ilrTextureBakeCmd -target "%s" -frontRange 0 -backRange 200 -frontBias 0 -backBias -100 -transferSpace 1 -selectionMode 0 -mismatchMode 0 -envelopeMode 0 -ignoreInconsistentNormals 1 -considerTransparency 0 -transparencyThreshold 0.001000000047 -camera "persp" -normalDirection 0 -shadows 1 -alpha 1 -viewDependent 0 -orthoRefl 1 -backgroundColor 0 0 0 -frame 1 -bakeLayer TurtleDefaultBakeLayer -width 512 -height 512 -saveToRenderView 0 -saveToFile 1 -directory "%s/turtle/bakedTextures/" -fileName "baked_$p_$s.$e" -fileFormat 9 -visualize 0 -uvRange 0 -uMin 0 -uMax 1 -vMin 0 -vMax 1 -uvSet "" -tangentUvSet "" -edgeDilation 5 -bilinearFilter 1 -merge 0 -conservative 0 -windingOrder 1 -fullShading 1 -useRenderView 1 -layer defaultRenderLayer' % (
-            shapes, MAYAPROJECT)
+            shapes, MayaProjectDir)
         pm.mel.eval(bakeAO)
 
         cmds.select(meshName)
         aoMapAdjust(os.path.join(direcotory, 'T_%s_s.png' % name),
-                    os.path.join(MAYAPROJECT, r"turtle\bakedTextures\baked_beauty_%s.png" % shapes))
+                    os.path.join(MayaProjectDir, r"turtle\bakedTextures\baked_beauty_%s.png" % shapes))
 
         createShadow(name)
     return meshName
@@ -392,7 +402,7 @@ def exportFBX(path, selection=True):
         cmds.FBXExport('-file', path)
 
 
-def saveScreenshot(name, directory=SOURCEIMAGES):
+def saveScreenshot(name, directory=TexturesDir):
     # 图片保存路径
     cmds.displayRGBColor('backgroundTop', 1, 1, 1)
     cmds.displayRGBColor('backgroundBottom', 1, 1, 1)
@@ -411,11 +421,11 @@ def saveScreenshot(name, directory=SOURCEIMAGES):
 
 
 def upTextures(name, directory, goodsImage=False):
-    textureDir = os.path.join(MAYAPROJECT, 'sourceimages')
+    textureDir = os.path.join(MayaProjectDir, 'sourceimages')
 
     if goodsImage:
         try:
-            shutil.copy(os.path.join(textureDir, '%s.jpg' % name), directory)
+            shutil.copy(os.path.join(TexturesDir, '%s.jpg' % name), directory)
         except:
             cmds.warning(u'缺少商品图片')
             return
@@ -450,9 +460,9 @@ def upTextures(name, directory, goodsImage=False):
 
 
 def createMetallicTex(name):
-    for i in os.listdir(MAYAPROJECT):
+    for i in os.listdir(MayaProjectDir):
         if i.endswith('Diffuse.png'):
-            diffuseImage = os.path.join(MAYAPROJECT, i)
+            diffuseImage = os.path.join(MayaProjectDir, i)
             break
         else:
             diffuseImage = None
@@ -478,22 +488,22 @@ def createMetallicTex(name):
         im2.putpixel(i, 255)
         im0.putpixel(i, (226, 191, 141))
 
-    im2.save(os.path.join(MAYAPROJECT, 'sourceimages\T_%s_m.png' % name))
-    im0.save(os.path.join(MAYAPROJECT, 'Diffuse.png'))
+    im2.save(os.path.join(MayaProjectDir, 'sourceimages\T_%s_m.png' % name))
+    im0.save(os.path.join(MayaProjectDir, 'Diffuse.png'))
 
 
-def exportTo(name, simplygon=False, unity=False):
+def exportTo(name, simplygon=False, unity=False, marmoset=False):
     if simplygon:
         simplygonInfo = readJson(SimplyGonJson)
         simplygonInfo['Execute'].append(name)
         fbxName = os.path.join(r'F:\Share\simplygon\standby', '%s.fbx' % name)
         cmds.FBXExportEmbeddedTextures('-v', True)
         cmds.FBXExport('-file', fbxName, '-s')
-        writeJson(SimplyGonJson,simplygonInfo)
+        writeJson(SimplyGonJson, simplygonInfo)
 
     elif unity:
         unityInfo = readJson(UnityJson)
-        unityDirPath = createDirectory(os.path.join(UNITYPROJECTPATH, name))
+        unityDirPath = createDirectory(os.path.join(UnityProjectDir, name))
         try:
             cmds.select('s' + name)
         except:
@@ -517,7 +527,22 @@ def exportTo(name, simplygon=False, unity=False):
 
         upTextures(name, unityDirPath)
         unityInfo['Execute'].append(name)
-        writeJson(UnityJson,unityInfo)
+        writeJson(UnityJson, unityInfo)
+    elif marmoset:
+        fbxDir = createDirectory(os.path.join(MarmosetDir, 'fbx'))
+        fbxName = os.path.join(fbxDir, name + '.fbx')
+        try:
+            cmds.select('s' + name)
+            cmds.FBXExport('-file', fbxName, '-s')
+            upTextures(name,fbxDir)
+            if name in MayaInfo['Marmoset']:
+                MayaInfo['Marmoset'].remove(name)
+            if name not in MarmosetInfo['Execute']:
+                MarmosetInfo['Execute'].append(name)
+        except:
+            MayaInfo['Error']['Marmoset'].append(name)
+        writeJson(MarmosetJson, MarmosetInfo)
+        writeJson(MayaJson, MayaInfo)
 
 
 def importSimplyGon(name):
@@ -528,9 +553,9 @@ def importSimplyGon(name):
     n = r"F:\Share\simplygon\outputDir\lowPix\%s\LOD1\Textures\Normals.png" % name
 
     try:
-        shutil.copy(ao, MAYAPROJECT)
-        shutil.copy(d, MAYAPROJECT)
-        shutil.copy(n, MAYAPROJECT)
+        shutil.copy(ao, MayaProjectDir)
+        shutil.copy(d, MayaProjectDir)
+        shutil.copy(n, MayaProjectDir)
         importMeshFile(fbxPath)
 
     except:
@@ -540,7 +565,7 @@ def importSimplyGon(name):
 
 def createNewScene(name):
     newScene()
-    sceneDir = os.path.join(MAYAPROJECT, 'scenes')
+    sceneDir = os.path.join(MayaProjectDir, 'scenes')
     sceneFile = os.path.join(sceneDir, name)
     cmds.file(rename=sceneFile)
     cmds.file(save=True, force=True, type='mayaAscii')
@@ -583,9 +608,9 @@ def temp1():
 
     goodsList = goodsInfo['goodsList']
 
-    scenesDir = os.path.join(MAYAPROJECT, 'scenes')
-    sourceImagesDir = os.path.join(MAYAPROJECT, 'sourceimages')
-    texturesDir = os.path.join(MAYAPROJECT, 'Textures')
+    scenesDir = os.path.join(MayaProjectDir, 'scenes')
+    sourceImagesDir = os.path.join(MayaProjectDir, 'sourceimages')
+    texturesDir = os.path.join(MayaProjectDir, 'Textures')
     errorList = []
 
     for i in goodsList:
@@ -648,9 +673,9 @@ def temp2():
 
     goodsList = goodsInfo['goodsList']
 
-    scenesDir = os.path.join(MAYAPROJECT, 'scenes')
-    sourceImagesDir = os.path.join(MAYAPROJECT, 'sourceimages')
-    texturesDir = os.path.join(MAYAPROJECT, 'Textures')
+    scenesDir = os.path.join(MayaProjectDir, 'scenes')
+    sourceImagesDir = os.path.join(MayaProjectDir, 'sourceimages')
+    texturesDir = os.path.join(MayaProjectDir, 'Textures')
     errorList = []
 
     for i in goodsList:
@@ -675,15 +700,16 @@ def temp2():
     print changeTime(time.time() - startTime)
     print errorList
 
+
 def toUnityPackage():
-    errorList = readJson(os.path.join(MAYAPROJECT,'errorList.json'))
-    scenesDir = os.path.join(MAYAPROJECT, 'scenes')
+    errorList = readJson(os.path.join(MayaProjectDir, 'errorList.json'))
+    scenesDir = os.path.join(MayaProjectDir, 'scenes')
 
     for i in errorList:
         maFile = os.path.join(scenesDir, i + '.ma')
         openMeshFile(maFile)
 
-        cmds.select('s'+i)
+        cmds.select('s' + i)
 
         createPBS(i)
         createShadow(i)
@@ -694,8 +720,65 @@ def toUnityPackage():
 
         cmds.file(save=True)
         print i
-    writeJson(os.path.join(MAYAPROJECT, 'errorList.json'), errorList)
+    writeJson(os.path.join(MayaProjectDir, 'errorList.json'), errorList)
     if errorList == []:
         print u'修改完成'
     else:
         print errorList, u'需要修改'
+
+
+def autoManage(marmoset=False):
+    startTime = time.time()
+    marmosetList = MayaInfo['Marmoset'][:]
+    if marmoset:
+        for sku in marmosetList:
+            maFile = os.path.join(ScenesDir, sku + '.ma')
+            openMeshFile(maFile)
+            exportTo(sku, marmoset=True)
+    print changeTime(time.time() - startTime)
+
+
+def revision(name,marmoset=False):
+    if marmoset:
+        try:
+            exportTo(name,marmoset=True)
+            MarmosetInfo['Error'].remove(name)
+        except:
+            print 'Error'
+        writeJson(MarmosetJson,MarmosetInfo)
+
+
+def getUvShelList(name):
+    selList = om.MSelectionList()
+    selList.add(name)
+    selListIter = om.MItSelectionList(selList, om.MFn.kMesh)
+    pathToShape = om.MDagPath()
+    selListIter.getDagPath(pathToShape)
+    meshNode = pathToShape.fullPathName()
+    uvSets = cmds.polyUVSet(meshNode, query=True, allUVSets=True)
+    allSets = []
+    for uvset in uvSets:
+        shapeFn = om.MFnMesh(pathToShape)
+        shells = om.MScriptUtil()
+        shells.createFromInt(0)
+        # shellsPtr = shells.asUintPtr()
+        nbUvShells = shells.asUintPtr()
+
+        uArray = om.MFloatArray()  # array for U coords
+        vArray = om.MFloatArray()  # array for V coords
+        uvShellIds = om.MIntArray()  # The container for the uv shell Ids
+
+        shapeFn.getUVs(uArray, vArray)
+        shapeFn.getUvShellsIds(uvShellIds, nbUvShells, uvset)
+
+        # shellCount = shells.getUint(shellsPtr)
+        shells = {}
+        for i, n in enumerate(uvShellIds):
+            if n in shells:
+                # shells[n].append([uArray[i],vArray[i]])
+                shells[n].append('%s.map[%i]' % (name, i))
+            else:
+                # shells[n] = [[uArray[i],vArray[i]]]
+                shells[n] = ['%s.map[%i]' % (name, i)]
+        allSets.append({uvset: shells})
+    return allSets

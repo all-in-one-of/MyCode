@@ -291,18 +291,18 @@ def addSpecification(goodsSKU, specifications):
 
 
 if __name__ == '__main__':
-    merchantName = '荣鼎轩红木'
+    merchantName = '高居明作'
     selectMerchant(merchantName)
-    names = readJson(r'C:\Users\Intime\Documents\MyCode\IntimeTool\rdx.json')
+    # names = readJson(os.path.)
 
     # for name in names:
-    #     goodsInfo = {'inputPersonnel': '00',
-    #                  'name': name[0],
-    #                  'merchant': merchantName,
-    #                  'classify': '其他',
-    #                  'brand': '荣鼎轩',
-    #                  'series': '其他'}
-    #     createSKU(fillGoodsInfo(goodsInfo))
+    goodsInfo = {'inputPersonnel': '00',
+                 'name': '单人沙发(扫描)',
+                 'merchant': merchantName,
+                 'classify': '其他',
+                 'brand': '荣鼎轩',
+                 'series': '其他'}
+    createSKU(fillGoodsInfo(goodsInfo))
 
     # merchantInfo = readJson(r'F:\Share\goods\yingtaikeji\yingtaikeji.json')
     # merchantPath = r'F:\Share\goods\yingtaikeji'
