@@ -25,7 +25,9 @@ for (int i = 0; i < num; ++i){
     int vtx = addvertex(0, prim, pt);
 
 }
-
+void hudie(){
+    
+}
 // 蝴蝶
 for (float n = 0; n < chf('length'); n += chf('distance')){
     
