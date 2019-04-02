@@ -43,3 +43,4 @@ def findSpecifiedFile(path, suffix=''):
 #     fbx_import(i)
 fbx = r"F:\Share\simplygon\inputDir\00000000.fbx"
 fbx_import(fbx)
+aaa
