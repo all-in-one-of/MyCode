@@ -4,6 +4,7 @@ import json
 # instantiate a new factory
 fbx_factory = PyFbxFactory()
 
+
 def fbx_import(slicer_fbx):
     # build the path for the fbx file
     # kaiju_assets_dir = os.path.join(os.path.expanduser('~/Desktop'), 'Kaiju_Assets/Slicer')
@@ -12,14 +13,16 @@ def fbx_import(slicer_fbx):
 
     # configure the factory
     fbx_factory.ImportUI.bCreatePhysicsAsset = False
-    fbx_factory.ImportUI.bImportMaterials = False
-    fbx_factory.ImportUI.bImportTextures = False
+    fbx_factory.ImportUI.bImportMaterials = True
+    fbx_factory.ImportUI.bImportTextures = True
     fbx_factory.ImportUI.bImportAnimations = False
     # scale the mesh (the Kaiju is 30 meters high !)
-    fbx_factory.ImportUI.SkeletalMeshImportData.ImportUniformScale = 0.1;
+    # fbx_factory.ImportUI.SkeletalMeshImportData.ImportUniformScale = 0.1
 
     # import the mesh
-    slicer_mesh = fbx_factory.factory_import_object(slicer_fbx, '/Game/Kaiju/Slicer')
+    slicer_mesh = fbx_factory.factory_import_object(
+        slicer_fbx, '/Game/Kaiju/Slicer')
+
 
 def findSpecifiedFile(path, suffix=''):
     '''
@@ -36,6 +39,7 @@ def findSpecifiedFile(path, suffix=''):
     return _file
 
 
-for i in findSpecifiedFile(r'D:\test','.fbx'):
-    fbx_import(i)
-
+# for i in findSpecifiedFile(r'D:\test','.fbx'):
+#     fbx_import(i)
+fbx = r"F:\Share\simplygon\inputDir\00000000.fbx"
+fbx_import(fbx)
