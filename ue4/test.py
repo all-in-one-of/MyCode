@@ -91,5 +91,5 @@ kaiju_assets_dir = os.path.join(os.path.expanduser('~/Desktop'), 'Kaiju_Assets/S
 
 slicer_fbx = os.path.join(kaiju_assets_dir, 'slicer.fbx')
 # fbxImport(slicer_fbx, 0.1)
-createMaterial()
-textureImport()
+# createMaterial()
+# textureImport()
