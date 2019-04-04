@@ -5,13 +5,18 @@
 @Author  : Intime
 @Software: PyCharm
 """
-from openpyxl import load_workbook
+from openpyxl import load_workbook,workbook
 from IntimeTool.usual import *
 
-wb = load_workbook(r"F:\Share\原始模型\高居明作\高居明作 信息完成.xlsx")
+xlsx = r"F:\Share\原始模型\高居明作\高居明作 信息完成.xlsx"
+xlsx1 = r"F:\Share\原始模型\高居明作\高居明作 信息完成1.xlsx"
+
+wb = load_workbook(xlsx)
 
 ws = wb['Sheet1']
-# c = ws.cell(row=x, column=y)
+ws1 = wb.create_sheet('已拍照')
+ws2 = wb.create_sheet('未拍照')
+ws3 = wb.create_sheet('不制作')
 
 a = []
 b = []
@@ -23,10 +28,16 @@ for i in ws.values:
         b.append(i)
     else:
         c.append(i)
+for i in a:
+    ws1['A'+str(a.index(i)+1)]=i[1]
+    ws1['B'+str(a.index(i)+1)]=i[3]
 
-d = {}
-d['Done']=a
-d['Undone']=b
-d['Wait']=c
+for i in b:
+    ws2['A'+str(b.index(i)+1)]=i[1]
+    ws2['B'+str(b.index(i)+1)]=i[3]
 
-writeJson(r'F:\Share\原始模型\高居明作\gjmz.json',d)
+for i in c:
+    ws3['A'+str(c.index(i)+1)]=i[1]
+    ws3['B'+str(c.index(i)+1)]=i[3]
+
+wb.save(xlsx1)

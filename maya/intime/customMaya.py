@@ -11,6 +11,9 @@ import pymel.core as pm
 from maya import cmds, mel
 import maya.OpenMaya as om
 
+GoodsDir = r'F:\Share\goods'
+
+
 def createDirectory(directory):
     '''
     创建路径，如果文件夹不存在，就创建
@@ -52,6 +55,16 @@ SimplyGonJson = os.path.join(SimplyGonDirectory, 'simplygon.json')
 MarmosetDir = r'F:\Share\Marmoset'
 MarmosetJson = os.path.join(MarmosetDir, 'Marmoset.json')
 MarmosetInfo = readJson(MarmosetJson)
+
+#################################################
+MerchantName = 'gaojumingzuo'
+MerchantDir = os.path.join(GoodsDir, MerchantName)
+MerchantJson = os.path.join(MerchantDir, MerchantName + '.json')
+MerchantInfo = readJson(MerchantJson)
+GoodsList = MerchantInfo['goodsList']
+
+
+##########################################
 
 
 def writeJson(jsonPath, info):
@@ -534,7 +547,7 @@ def exportTo(name, simplygon=False, unity=False, marmoset=False):
         try:
             cmds.select('s' + name)
             cmds.FBXExport('-file', fbxName, '-s')
-            upTextures(name,fbxDir)
+            upTextures(name, fbxDir)
             if name in MayaInfo['Marmoset']:
                 MayaInfo['Marmoset'].remove(name)
             if name not in MarmosetInfo['Execute']:
@@ -738,14 +751,14 @@ def autoManage(marmoset=False):
     print changeTime(time.time() - startTime)
 
 
-def revision(name,marmoset=False):
+def revision(name, marmoset=False):
     if marmoset:
         try:
-            exportTo(name,marmoset=True)
+            exportTo(name, marmoset=True)
             MarmosetInfo['Error'].remove(name)
         except:
             print 'Error'
-        writeJson(MarmosetJson,MarmosetInfo)
+        writeJson(MarmosetJson, MarmosetInfo)
 
 
 def getUvShelList(name):
@@ -782,3 +795,57 @@ def getUvShelList(name):
                 shells[n] = ['%s.map[%i]' % (name, i)]
         allSets.append({uvset: shells})
     return allSets
+
+
+def createMoc(size, name):
+    name = 'moc_' + name
+    a = cmds.polyCube(w=size[0], d=size[1], h=size[2], n=name)
+    cmds.select(a)
+    returnZero()
+
+
+def saveMa(name, dir=ScenesDir):
+    name = os.path.join(dir, name)
+    cmds.file(rename=name)
+    cmds.file(save=True, type='mayaAscii', force=True)
+
+
+def returnZero():
+    curSel = cmds.ls(long=True, selection=True, type='dagNode')
+    cmds.makeIdentity(a=True)
+    for n in curSel:
+        bbox = cmds.exactWorldBoundingBox(n)
+        bottom = [(bbox[0] + bbox[3]) / 2, bbox[1], (bbox[2] + bbox[5]) / 2]
+        cmds.xform(n, piv=bottom, ws=True)
+
+    cmds.xform(n, translation=[-bottom[0], -bottom[1], -bottom[2]])
+    cmds.makeIdentity(a=True)
+    cmds.DeleteAllHistory()
+
+
+def temp3():
+    startTime = time.time()
+    errorList = []
+    try:
+        for sku in GoodsList:
+            goodsDir = os.path.join(MerchantDir, sku)
+            goodsJson = os.path.join(goodsDir, sku + '.json')
+            goodsInfo = readJson(goodsJson)
+
+            size = goodsInfo['size']
+            createNewScene(sku)
+            createMoc(size, sku)
+            saveMa(sku, goodsDir)
+    except:
+        errorList.append(sku)
+
+    print changeTime(time.time() - startTime)
+    print errorList
+
+
+def load(sku):
+    goodsDir = os.path.join(MerchantDir, sku)
+    maFile = os.path.join(goodsDir, sku + '.ma')
+    if os.path.exists(maFile):
+        shutil.copy(maFile, ScenesDir)
+        openMeshFile(os.path.join(ScenesDir, sku + '.ma'))
