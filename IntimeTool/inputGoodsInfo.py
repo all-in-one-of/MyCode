@@ -293,21 +293,44 @@ def addSpecification(goodsSKU, specifications):
 if __name__ == '__main__':
     merchantName = '高居明作'
     selectMerchant(merchantName)
-    # names = readJson(os.path.)
+    merchantINfo = readJson(r"F:\Share\原始模型\高居明作\gjmz.json")
+    merchantINfo = merchantINfo['Done']
+    for info in merchantINfo:
+        name = info[1]
+        if '新小南园' in name:
+            continue
+        if info[3] is not None:
+            size = [float(n) for n in info[3].split('*')]
+        else:
+            size = [100, 100, 100]
+        if info[8] is not None:
+            classify = info[8]
+        else:
+            classify = '其他'
+        if info[9] is not None:
+            series = info[9]
+        else:
+            series = '其他'
+        if info[6] is not None:
+            style = info[6]
+        else:
+            style = '其他'
+        if info[5] is not None:
+            material = info[5]
+        if info[4] is not None:
+            artNo = info[4]
+        else:
+            artNo = '其他'
 
-    # for name in names:
-    goodsInfo = {'inputPersonnel': '00',
-                 'name': '单人沙发(扫描)',
-                 'merchant': merchantName,
-                 'classify': '其他',
-                 'brand': '荣鼎轩',
-                 'series': '其他'}
-    createSKU(fillGoodsInfo(goodsInfo))
+        goodsInfo = {'inputPersonnel': '00',
+                     'name': name,
+                     'merchant': merchantName,
+                     'classify': classify,
+                     'brand': '高居明作',
+                     'series': series,
+                     'size': size,
+                     'style': style,
+                     'material': material,
+                     'Art.No.': artNo}
 
-    # merchantInfo = readJson(r'F:\Share\goods\yingtaikeji\yingtaikeji.json')
-    # merchantPath = r'F:\Share\goods\yingtaikeji'
-    # for i in merchantInfo['goodsList']:
-    #     jsonPath = os.path.join(merchantPath,'%s/%s.json' %(i,i))
-    #     goodsInfo = readJson(jsonPath)
-    #     goodsInfo['name']=merchantInfo['contrast'][i]
-    #     writeJson(jsonPath,goodsInfo)
+        createSKU(fillGoodsInfo(goodsInfo))
