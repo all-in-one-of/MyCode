@@ -31,6 +31,7 @@ def readJson(path):
     :param path: json文件
     :return: 字典
     """
+    print path
     with open(path, 'r') as f:
         _info = json.load(f)  # 导入json文件
         # b = json.dumps(info, encoding="utf-8", ensure_ascii=False)  # 转码成字符串
@@ -41,6 +42,10 @@ def readJson(path):
 MayaProjectDir = cmds.workspace(fn=True)
 MayaJson = os.path.join(MayaProjectDir, 'Maya.json')
 MayaInfo = readJson(MayaJson)
+
+IntimeInfoJsonPath = r"F:\Share\goods\intimeInfo.json"
+IntimeGoodsDir = r'F:\Share\goods'
+IntimeInfo = readJson(IntimeInfoJsonPath)
 
 SourceImages = createDirectory(os.path.join(MayaProjectDir, 'sourceimages'))
 ScenesDir = createDirectory(os.path.join(MayaProjectDir, 'scenes'))
@@ -672,10 +677,12 @@ def temp1():
         except:
             errorList.append(contrastSKU)
 
-        print i
+        print
+        i
 
     print errorList
-    print changeTime(time.time() - startTime)
+    print
+    changeTime(time.time() - startTime)
 
 
 def temp2():
@@ -710,7 +717,8 @@ def temp2():
 
         print i
 
-    print changeTime(time.time() - startTime)
+    print
+    changeTime(time.time() - startTime)
     print errorList
 
 
@@ -733,9 +741,11 @@ def toUnityPackage():
 
         cmds.file(save=True)
         print i
+
     writeJson(os.path.join(MayaProjectDir, 'errorList.json'), errorList)
     if errorList == []:
-        print u'修改完成'
+        print
+        u'修改完成'
     else:
         print errorList, u'需要修改'
 
@@ -748,7 +758,8 @@ def autoManage(marmoset=False):
             maFile = os.path.join(ScenesDir, sku + '.ma')
             openMeshFile(maFile)
             exportTo(sku, marmoset=True)
-    print changeTime(time.time() - startTime)
+    print
+    changeTime(time.time() - startTime)
 
 
 def revision(name, marmoset=False):
@@ -757,7 +768,8 @@ def revision(name, marmoset=False):
             exportTo(name, marmoset=True)
             MarmosetInfo['Error'].remove(name)
         except:
-            print 'Error'
+            print
+            'Error'
         writeJson(MarmosetJson, MarmosetInfo)
 
 
@@ -839,7 +851,8 @@ def temp3():
     except:
         errorList.append(sku)
 
-    print changeTime(time.time() - startTime)
+    print
+    changeTime(time.time() - startTime)
     print errorList
 
 
@@ -849,3 +862,27 @@ def load(sku):
     if os.path.exists(maFile):
         shutil.copy(maFile, ScenesDir)
         openMeshFile(os.path.join(ScenesDir, sku + '.ma'))
+
+
+def referImage():
+    name = baseNameForPath(cmds.file(q=True, loc=True), False)
+
+    goodsDir = os.path.join(MerchantDir, name)
+    goodsJson = os.path.join(goodsDir, name + '.json')
+    try:
+        goodsInfo = readJson(goodsJson)
+        imageDir = goodsInfo['refer']
+        os.system('explorer.exe %s' % imageDir)
+    except:
+        cmds.warning(u'没有参考图')
+
+
+def temp4():
+    list = cmds.ls(sl=True)
+    a1 = list[0]
+    a2 = list[1]
+
+    a2Bbox = cmds.exactWorldBoundingBox(a2)
+    cmds.select(a1)
+    returnZero()
+    cmds.move(a2Bbox[4],y=True)

@@ -1,3 +1,4 @@
+# coding=utf-8
 import os
 from unreal_engine.classes import PyFbxFactory, MaterialFactoryNew, TextureFactory
 import json

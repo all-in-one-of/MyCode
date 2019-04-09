@@ -14,7 +14,6 @@ import getpass
 
 IntimeInfoJsonPath = r"F:\Share\goods\intimeInfo.json"
 IntimeGoodsDir = r'F:\Share\goods'
-
 IntimeInfo = readJson(IntimeInfoJsonPath)
 MerchatnsList = IntimeInfo['merchants']
 MerchantsDict = IntimeInfo['contrast']
@@ -295,62 +294,66 @@ def addSpecification(goodsSKU, specifications):
     writeJson(goodsJsonPath, goodsInfo)
 
 
+# if __name__ == '__main__':
+#     merchantName = '高居明作'
+#     selectMerchant(merchantName)
+#     merchantINfo = readJson(r"F:\Share\original\gaojumingzuo\gjmz.json")
+#     merchantINfo = merchantINfo['Done']
+#     tempList = merchantINfo[:]
+#     for info in merchantINfo:
+#         try:
+#             if info[7] is not None:
+#                 standard = info[7]
+#             else:
+#                 standard = '默认'
+#             name = info[1] + '_' + standard
+#             if '新小南园' in name:
+#                 continue
+#             if info[3] is not None:
+#                 size = [float(n) for n in info[3].split('*')]
+#             else:
+#                 size = [100, 100, 100]
+#             if info[8] is not None:
+#                 classify = info[8]
+#             else:
+#                 classify = '其他'
+#             if info[9] is not None:
+#                 series = info[9]
+#             else:
+#                 series = '其他'
+#             if info[6] is not None:
+#                 style = info[6]
+#             else:
+#                 style = '其他'
+#             if info[5] is not None:
+#                 material = info[5]
+#             if info[4] is not None:
+#                 artNo = info[4]
+#             else:
+#                 artNo = '其他'
+#
+#             imageDir = '%03d' % int(input(name + ': '))
+#
+#             refer = os.path.join(r'F:\Share\original\gaojumingzuo\image', imageDir)
+#
+#             goodsInfo = {'inputPersonnel': '00',
+#                          'name': name,
+#                          'merchant': merchantName,
+#                          'classify': classify,
+#                          'brand': '高居明作',
+#                          'series': series,
+#                          'size': size,
+#                          'style': style,
+#                          'material': material,
+#                          'Art.No.': artNo,
+#                          'refer': refer}
+#
+#             createSKU(fillGoodsInfo(goodsInfo))
+#             tempList.remove(info)
+#         except:
+#             writeJson('tempList.json', tempList)
+#             break
+
+
 if __name__ == '__main__':
-    merchantName = '高居明作'
-    selectMerchant(merchantName)
-    merchantINfo = readJson(r"F:\Share\original\gaojumingzuo\gjmz.json")
-    merchantINfo = merchantINfo['Done']
-    tempList = merchantINfo[:]
-    for info in merchantINfo:
-        try:
-            if info[7] is not None:
-                standard = info[7]
-            else:
-                standard = '默认'
-            name = info[1] + '_' + standard
-            if '新小南园' in name:
-                continue
-            if info[3] is not None:
-                size = [float(n) for n in info[3].split('*')]
-            else:
-                size = [100, 100, 100]
-            if info[8] is not None:
-                classify = info[8]
-            else:
-                classify = '其他'
-            if info[9] is not None:
-                series = info[9]
-            else:
-                series = '其他'
-            if info[6] is not None:
-                style = info[6]
-            else:
-                style = '其他'
-            if info[5] is not None:
-                material = info[5]
-            if info[4] is not None:
-                artNo = info[4]
-            else:
-                artNo = '其他'
-
-            imageDir = '%03d' % int(input(name + ': '))
-
-            refer = os.path.join(r'F:\Share\original\gaojumingzuo\image', imageDir)
-
-            goodsInfo = {'inputPersonnel': '00',
-                         'name': name,
-                         'merchant': merchantName,
-                         'classify': classify,
-                         'brand': '高居明作',
-                         'series': series,
-                         'size': size,
-                         'style': style,
-                         'material': material,
-                         'Art.No.': artNo,
-                         'refer': refer}
-
-            createSKU(fillGoodsInfo(goodsInfo))
-            tempList.remove(info)
-        except:
-            writeJson('tempList.json', tempList)
-            break
+    allocatingTask('02','00200500')
