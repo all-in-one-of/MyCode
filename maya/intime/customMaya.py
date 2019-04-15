@@ -677,8 +677,7 @@ def temp1():
         except:
             errorList.append(contrastSKU)
 
-        print
-        i
+        print i
 
     print errorList
     print
@@ -859,6 +858,11 @@ def temp3():
 def load(sku):
     goodsDir = os.path.join(MerchantDir, sku)
     maFile = os.path.join(goodsDir, sku + '.ma')
+    localMa = os.path.join(ScenesDir,sku+'.ma')
+
+    if os.path.exists(localMa):
+        cmds.warning(u'文件已存在')
+        return
     if os.path.exists(maFile):
         shutil.copy(maFile, ScenesDir)
         openMeshFile(os.path.join(ScenesDir, sku + '.ma'))

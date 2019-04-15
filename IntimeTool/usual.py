@@ -15,6 +15,8 @@ import json
 import time
 import hashlib
 import wmi
+import zipfile
+
 c = wmi.WMI()
 #处理器
 def printCPU():
@@ -306,6 +308,11 @@ def refreshMerchantInfo():
     print(len(num))
     writeJson(r'C:\Users\Intime\Documents\MyCode\IntimeTool\rdx.json', num)
 
+def zipDir(dirList,output):
+    z = zipfile.ZipFile(output,'w',zipfile.ZIP_STORED)
+    for dir in dirList:
+        z.write(dir)
+    z.close()
 
 # # with open(os.path.join(FilePath,'newGoods.json'),'w',encoding='utf-8') as f:
 # for dir in os.listdir(FilePath):
