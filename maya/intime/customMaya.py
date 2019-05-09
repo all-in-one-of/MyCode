@@ -31,7 +31,8 @@ def readJson(path):
     :param path: json文件
     :return: 字典
     """
-    print path
+    print
+    path
     with open(path, 'r') as f:
         _info = json.load(f)  # 导入json文件
         # b = json.dumps(info, encoding="utf-8", ensure_ascii=False)  # 转码成字符串
@@ -513,7 +514,8 @@ def createMetallicTex(name):
 def exportTo(name, simplygon=False, unity=False, marmoset=False):
     if simplygon:
         simplygonInfo = readJson(SimplyGonJson)
-        simplygonInfo['Execute'].append(name)
+        if name not in simplygonInfo['Execute']:
+            simplygonInfo['Execute'].append(name)
         fbxName = os.path.join(r'F:\Share\simplygon\standby', '%s.fbx' % name)
         cmds.FBXExportEmbeddedTextures('-v', True)
         cmds.FBXExport('-file', fbxName, '-s')
@@ -637,7 +639,8 @@ def temp1():
         contrastSKU = rdxInfo[goodsList.index(i)][1]
 
         contrastDir = os.path.join(rdxDir, contrastSKU)
-        print contrastDir
+        print
+        contrastDir
         images = findSpecifiedFile(contrastDir, 'png')
         goodsImage = findSpecifiedFile(contrastDir, '.jpg')[0]
 
@@ -677,9 +680,11 @@ def temp1():
         except:
             errorList.append(contrastSKU)
 
-        print i
+        print
+        i
 
-    print errorList
+    print
+    errorList
     print
     changeTime(time.time() - startTime)
 
@@ -714,11 +719,13 @@ def temp2():
 
         cmds.file(save=True)
 
-        print i
+        print
+        i
 
     print
     changeTime(time.time() - startTime)
-    print errorList
+    print
+    errorList
 
 
 def toUnityPackage():
@@ -739,14 +746,16 @@ def toUnityPackage():
             errorList.remove(i)
 
         cmds.file(save=True)
-        print i
+        print
+        i
 
     writeJson(os.path.join(MayaProjectDir, 'errorList.json'), errorList)
     if errorList == []:
         print
         u'修改完成'
     else:
-        print errorList, u'需要修改'
+        print
+        errorList, u'需要修改'
 
 
 def autoManage(marmoset=False):
@@ -852,13 +861,14 @@ def temp3():
 
     print
     changeTime(time.time() - startTime)
-    print errorList
+    print
+    errorList
 
 
 def load(sku):
     goodsDir = os.path.join(MerchantDir, sku)
     maFile = os.path.join(goodsDir, sku + '.ma')
-    localMa = os.path.join(ScenesDir,sku+'.ma')
+    localMa = os.path.join(ScenesDir, sku + '.ma')
 
     if os.path.exists(localMa):
         cmds.warning(u'文件已存在')
@@ -889,4 +899,44 @@ def temp4():
     a2Bbox = cmds.exactWorldBoundingBox(a2)
     cmds.select(a1)
     returnZero()
-    cmds.move(a2Bbox[4],y=True)
+    cmds.move(a2Bbox[4], y=True)
+
+
+def temp5(x=True, y=True, z=True):
+    '''
+    吸附顶点
+    :return:
+    '''
+    cmds.selectPref()
+    points = cmds.ls(os=True)
+    print
+    points
+    if len(points) != 2:
+        cmds.warning(u'只能选取两个点')
+        return
+
+    originalPosint = points[0]
+    originalPosintVector = cmds.pointPosition(originalPosint)
+    originalPosint_x = originalPosintVector[0]
+    originalPosint_y = originalPosintVector[1]
+    originalPosint_z = originalPosintVector[2]
+
+    aimPoint = points[1]
+    aimPointVector = cmds.pointPosition(aimPoint)
+    aimPoint_x = aimPointVector[0]
+    aimPoint_y = aimPointVector[1]
+    aimPoint_z = aimPointVector[2]
+
+    cmds.select(originalPosint)
+
+    if x:
+        cmds.move(aimPoint_x, x=True)
+    if y:
+        cmds.move(aimPoint_y, y=True)
+    if z:
+        cmds.move(aimPoint_z, z=True)
+
+
+def temp6():
+    name = baseNameForPath(cmds.file(q=True, loc=True), False)
+    shutil.copy(os.path.join(ScenesDir, name + '.ma'), createDirectory(os.path.join(MerchantDir, name)))
